@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
-import { Search, Plus, Edit2, Trash2, Phone, X, Loader2, User as UserIcon, MapPin, Calendar, Mail, Layers, ChevronRight, ArrowUpDown, Heart, Baby, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Phone, X, Loader2, User as UserIcon, MapPin, Calendar, Mail, Layers, ChevronRight, ArrowUpDown, Heart, Briefcase, ShieldAlert, BadgeCheck } from 'lucide-react';
 import { getImageUrl } from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -294,7 +294,7 @@ export default function MembersList() {
                initial={{ opacity: 0, scale: 0.9, y: 30 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-               className="glass p-0 rounded-[3rem] w-full max-w-2xl shadow-2xl border border-white/20 overflow-hidden"
+               className="glass p-0 rounded-[3rem] w-full max-w-4xl shadow-2xl border border-white/20 overflow-hidden"
             >
               <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-800 p-12 text-white relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none" />
@@ -330,112 +330,146 @@ export default function MembersList() {
                 </div>
               </div>
 
-              <div className="p-12 space-y-12 bg-white dark:bg-zinc-950 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              <div className="p-10 space-y-12 bg-white dark:bg-zinc-950 max-h-[65vh] overflow-y-auto custom-scrollbar">
                 {/* Information Sections */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                  <div className="lg:col-span-2 space-y-12">
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
-                        <UserIcon className="w-3.5 h-3.5 mr-2" /> Personal Summary
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                        <UserIcon className="w-3.5 h-3.5 mr-2 text-primary-500" /> Member Identity
                       </h4>
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-600 flex items-center justify-center shrink-0"><MapPin className="w-5 h-5" /></div>
-                          <div>
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Address</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm line-clamp-1">{selectedMember.address || 'Anonymous'}</p>
+                          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0"><MapPin className="w-5 h-5" /></div>
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Address</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[11px] truncate">{selectedMember.address || 'Not Provided'}</p>
                           </div>
                         </div>
                         <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0"><ArrowUpDown className="w-5 h-5" /></div>
                           <div>
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Gender</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{selectedMember.gender || 'Not Specified'}</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Gender</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-xs">{selectedMember.gender || 'Unknown'}</p>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0"><Briefcase className="w-5 h-5" /></div>
+                          <div>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Profession</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate">{selectedMember.profession || 'N/A'}</p>
                           </div>
                         </div>
                       </div>
                     </section>
 
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
-                        <Layers className="w-3.5 h-3.5 mr-2" /> Ministry & Rank
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                        <Layers className="w-3.5 h-3.5 mr-2 text-primary-500" /> Spiritual Assignment
                       </h4>
-                      <div className="p-6 bg-zinc-900 dark:bg-zinc-900 rounded-3xl text-white shadow-xl shadow-zinc-900/20 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10"><Layers className="w-20 h-20" /></div>
-                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">System Status</p>
-                        <p className="text-2xl font-black mb-4">{selectedMember.membershipStatus || 'MEMBER'}</p>
-                        <div className="space-y-2">
-                          {selectedMember.groupNames?.map((g: string) => (
-                            <div key={g} className="flex items-center text-xs font-bold text-white/70">
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary-400 mr-2" /> {g}
+                      <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-indigo-600 rounded-[2rem] opacity-20 blur-lg group-hover:opacity-30 transition-opacity" />
+                        <div className="relative p-8 bg-zinc-900 rounded-[2rem] text-white overflow-hidden">
+                          <div className="absolute top-0 right-0 p-8 opacity-5">
+                            <Layers className="w-32 h-32 rotate-12" />
+                          </div>
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">System Authority</p>
+                              <p className="text-3xl font-black tracking-tighter uppercase">{selectedMember.membershipStatus || 'MEMBER'}</p>
                             </div>
-                          ))}
+                            <div className="px-4 py-2 bg-white/10 rounded-xl backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest">
+                              {selectedMember.userId ? 'Sync Active' : 'Offline Mode'}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                             {selectedMember.groupNames && selectedMember.groupNames.length > 0 ? selectedMember.groupNames.map((g: string) => (
+                              <div key={g} className="px-4 py-2 bg-primary-500/20 text-primary-300 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center border border-primary-500/20">
+                                <span className="w-2 h-2 rounded-full bg-primary-400 mr-2 animate-pulse" /> {g}
+                              </div>
+                            )) : <p className="text-white/30 italic text-sm font-medium">No ministry groups assigned</p>}
+                          </div>
                         </div>
                       </div>
                     </section>
                   </div>
 
-                  <div className="space-y-8">
+                  <div className="space-y-12">
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
-                        <Phone className="w-3.5 h-3.5 mr-2" /> Connection Info
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                        <Phone className="w-3.5 h-3.5 mr-2 text-primary-500" /> Outreach & Care
                       </h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl">
-                          <Mail className="w-5 h-5 mr-3 text-primary-500" />
-                          <span className="font-bold text-zinc-900 dark:text-zinc-100">{selectedMember.email || 'No email available'}</span>
+                      <div className="space-y-4">
+                        <div className="group/item flex items-center p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-primary-500/30 transition-all">
+                          <Mail className="w-5 h-5 mr-4 text-primary-500 group-hover/item:scale-110 transition-transform" />
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Email</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate">{selectedMember.email || 'No email'}</p>
+                          </div>
                         </div>
-                        <div className="flex items-center p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl">
-                          <Phone className="w-5 h-5 mr-3 text-primary-500" />
-                          <span className="font-bold text-zinc-900 dark:text-zinc-100">{selectedMember.phone || 'No phone provided'}</span>
-                        </div>
-                        <div className="flex items-center p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-2xl">
-                          <ShieldAlert className="w-5 h-5 mr-3 text-red-500" />
+                        <div className="group/item flex items-center p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-primary-500/30 transition-all">
+                          <Phone className="w-5 h-5 mr-4 text-emerald-500 group-hover/item:scale-110 transition-transform" />
                           <div>
-                            <p className="text-[9px] font-black text-red-400 uppercase tracking-widest">Emergency Contact</p>
-                            <p className="font-bold text-red-700 dark:text-red-400 text-xs">{selectedMember.emergencyContact || 'None'}</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Phone</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm tracking-tight">{selectedMember.phone || 'No phone'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/10 dark:border-red-500/20 rounded-2xl">
+                          <ShieldAlert className="w-5 h-5 mr-4 text-red-500" />
+                          <div>
+                            <p className="text-[9px] font-black text-red-400 uppercase tracking-widest leading-none mb-1">Emergency</p>
+                            <p className="font-bold text-red-700 dark:text-red-400 text-xs truncate">{selectedMember.emergencyContact || 'Not Set'}</p>
                           </div>
                         </div>
                       </div>
                     </section>
 
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
-                        <Heart className="w-3.5 h-3.5 mr-2" /> Family & Life
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                        <Heart className="w-3.5 h-3.5 mr-2 text-primary-500" /> Household
                       </h4>
-                      <div className="p-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6">
+                      <div className="p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 space-y-6">
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Marital Status</p>
-                            <p className="font-black text-zinc-900 dark:text-zinc-100 text-lg uppercase tracking-tight">{selectedMember.maritalStatus || 'Single'}</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                            <p className="font-black text-zinc-900 dark:text-zinc-100 text-md uppercase">{selectedMember.maritalStatus || 'Single'}</p>
                           </div>
-                          <Heart className={`w-8 h-8 ${selectedMember.maritalStatus === 'Married' ? 'text-red-500 fill-red-500' : 'text-zinc-200 dark:text-zinc-800'}`} />
+                          <div className={`p-3 rounded-xl ${selectedMember.maritalStatus === 'Married' ? 'bg-red-500/10 text-red-500' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400'}`}>
+                            <Heart className={`w-5 h-5 ${selectedMember.maritalStatus === 'Married' ? 'fill-red-500' : ''}`} />
+                          </div>
                         </div>
                         
                         {selectedMember.maritalStatus === 'Married' && (
-                          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Spouse Name</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100">{selectedMember.spouseName || '---'}</p>
+                          <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Spouse</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm tracking-tight">{selectedMember.spouseName || '---'}</p>
                           </div>
                         )}
 
-                        <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                          <div className="flex items-center justify-between mb-3">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Children</p>
-                            <Baby className="w-4 h-4 text-zinc-300" />
+                        <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                          <div className="flex items-center justify-between mb-4">
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Children</p>
+                            <div className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded text-[8px] font-black">
+                              {(() => {
+                                try {
+                                  const children = selectedMember.childrenData ? JSON.parse(selectedMember.childrenData) : [];
+                                  return children.length;
+                                } catch (e) { return 0; }
+                              })()} TOTAL
+                            </div>
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             {(() => {
                               try {
                                 const children = selectedMember.childrenData ? JSON.parse(selectedMember.childrenData) : [];
                                 return children.length > 0 ? children.map((c: any, i: number) => (
-                                  <div key={i} className="flex justify-between items-center text-sm">
-                                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{c.name}</span>
-                                    <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-md text-[10px] font-black text-zinc-500 uppercase">{c.age} Years</span>
+                                  <div key={i} className="flex justify-between items-center text-[11px] group/child">
+                                    <span className="font-bold text-zinc-700 dark:text-zinc-300 group-hover/child:text-primary-500 transition-colors uppercase tracking-tight">{c.name}</span>
+                                    <span className="text-[9px] font-black text-zinc-400">{c.age}Y</span>
                                   </div>
-                                )) : <p className="text-zinc-400 italic text-xs">No children listed</p>;
+                                )) : <p className="text-zinc-400 italic text-[10px]">No children registered</p>;
                               } catch (e) {
-                                return <p className="text-zinc-400 italic text-xs">No data</p>;
+                                return <p className="text-zinc-400 italic text-[10px]">Data error</p>;
                               }
                             })()}
                           </div>
