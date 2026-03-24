@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api, getImageUrl } from '../../services/api';
-import { User, Lock, Shield, Mail, Loader2, X, Eye, EyeOff, Camera, Calendar, CheckCircle2 } from 'lucide-react';
+import { User, Lock, Shield, Mail, Loader2, X, Eye, EyeOff, Camera, Calendar, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Change Password Modal ──────────────────────────────────────────────────────
@@ -132,7 +132,22 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [profileData, setProfileData] = useState({ dateOfBirth: '', profileImageUrl: '' });
+  const [profileData, setProfileData] = useState({ 
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address: '',
+    dateOfBirth: '', 
+    profileImageUrl: '',
+    gender: 'Other',
+    membershipStatus: 'Member',
+    maritalStatus: 'Single',
+    emergencyContact: '',
+    spouseName: '',
+    profession: '',
+    joinedDate: '',
+    children: [] as { name: string, age: string }[]
+  });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -142,11 +157,31 @@ export default function Settings() {
       if (!user?.memberId) { setLoading(false); return; }
       try {
         const res = await api.get(`/members/${user.memberId}`);
+        const data = res.data;
+        let children = [];
+        try {
+          children = data.childrenData ? JSON.parse(data.childrenData) : [];
+        } catch (e) {
+          console.error("Failed to parse children data", e);
+        }
+
         setProfileData({
-          dateOfBirth: res.data.dateOfBirth || '',
-          profileImageUrl: res.data.profileImageUrl || '',
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          phone: data.phone || '',
+          address: data.address || '',
+          dateOfBirth: data.dateOfBirth || '',
+          profileImageUrl: data.profileImageUrl || '',
+          gender: data.gender || 'Other',
+          membershipStatus: data.membershipStatus || 'Member',
+          maritalStatus: data.maritalStatus || 'Single',
+          emergencyContact: data.emergencyContact || '',
+          spouseName: data.spouseName || '',
+          profession: data.profession || '',
+          joinedDate: data.joinedDate || '',
+          children: children
         });
-        if (res.data.profileImageUrl) setImagePreview(res.data.profileImageUrl);
+        if (data.profileImageUrl) setImagePreview(data.profileImageUrl);
       } catch (error) {
         console.error('Failed to load profile', error);
       } finally {
@@ -166,29 +201,58 @@ export default function Settings() {
     reader.readAsDataURL(file);
   };
 
+  const addChild = () => {
+    setProfileData(prev => ({
+      ...prev,
+      children: [...prev.children, { name: '', age: '' }]
+    }));
+  };
+
+  const removeChild = (index: number) => {
+    setProfileData(prev => ({
+      ...prev,
+      children: prev.children.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateChild = (index: number, field: 'name' | 'age', value: string) => {
+    const newChildren = [...profileData.children];
+    newChildren[index][field] = value;
+    setProfileData(prev => ({ ...prev, children: newChildren }));
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.memberId) return;
     try {
       setSaving(true);
       setSuccessMsg('');
+      
+      const payload = {
+        ...profileData,
+        childrenData: JSON.stringify(profileData.children)
+      };
+
       if (selectedFile) {
         const formData = new FormData();
         formData.append('profileImage', selectedFile);
-        if (profileData.dateOfBirth) formData.append('dateOfBirth', profileData.dateOfBirth);
-        const response = await api.post(`/members/${user.memberId}/profile-image`, formData, { headers: { 'Content-Type': undefined } });
-        const imageUrl = response.data.profileImageUrl || response.data.imageUrl || response.data.url;
-        if (!imageUrl) throw new Error('No image URL returned');
-        setProfileData((prev) => ({ ...prev, profileImageUrl: imageUrl }));
-        setImagePreview(imageUrl);
-        setSelectedFile(null);
-        updateUser({ profileImageUrl: imageUrl });
-        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profileImageUrl: imageUrl } }));
-      } else {
-        await api.put(`/members/${user.memberId}/profile`, { dateOfBirth: profileData.dateOfBirth });
+        formData.append('dateOfBirth', payload.dateOfBirth);
+        // We'll update other fields separately or add to formData if the backend supports it.
+        // For now, let's do a two-step if needed, but the current backend uploadProfileImage
+        // only takes dateOfBirth. Let's update the standard update endpoint.
+        await api.post(`/members/${user.memberId}/profile-image`, formData, { headers: { 'Content-Type': undefined } });
       }
+
+      await api.put(`/members/${user.memberId}/profile`, payload);
+      
       setSuccessMsg('Profile updated successfully!');
       setTimeout(() => setSuccessMsg(''), 3000);
+      
+      // Update global user state if needed
+      if (profileData.profileImageUrl) {
+        updateUser({ profileImageUrl: profileData.profileImageUrl });
+        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profileImageUrl: profileData.profileImageUrl } }));
+      }
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -256,18 +320,137 @@ export default function Settings() {
                     <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
                   </div>
                 ) : (
-                  <form onSubmit={handleUpdateProfile} className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
-                      <div className="relative">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                        <input type="date" value={profileData.dateOfBirth} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })}
-                          className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                  <form onSubmit={handleUpdateProfile} className="col-span-full space-y-10 pt-4">
+                    {/* Basic Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">First Name</label>
+                        <input type="text" value={profileData.firstName} onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Last Name</label>
+                        <input type="text" value={profileData.lastName} onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Phone Number</label>
+                        <input type="text" value={profileData.phone} onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
+                        <div className="relative">
+                          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                          <input type="date" value={profileData.dateOfBirth} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })}
+                            className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-span-full space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Home Address</label>
+                        <textarea rows={2} value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none"
                         />
                       </div>
                     </div>
 
-                    <div className="col-span-full space-y-4">
+                    {/* Church & Demographics */}
+                    <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Gender</label>
+                        <select value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">System Rank (Status)</label>
+                        <select value={profileData.membershipStatus} onChange={(e) => setProfileData({ ...profileData, membershipStatus: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+                        >
+                          <option value="Member">Member</option>
+                          <option value="Worker">Worker</option>
+                          <option value="Leader">Leader</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Marital Status</label>
+                        <select value={profileData.maritalStatus} onChange={(e) => setProfileData({ ...profileData, maritalStatus: e.target.value })}
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+                        >
+                          <option value="Single">Single</option>
+                          <option value="Married">Married</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Profession</label>
+                        <input type="text" value={profileData.profession} onChange={(e) => setProfileData({ ...profileData, profession: e.target.value })}
+                          placeholder="e.g., Software Engineer"
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Emergency & Family */}
+                    <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800 space-y-8">
+                       <div className="space-y-2">
+                        <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Emergency Contact</label>
+                        <input type="text" value={profileData.emergencyContact} onChange={(e) => setProfileData({ ...profileData, emergencyContact: e.target.value })}
+                          placeholder="Name and Phone Number"
+                          className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                        />
+                      </div>
+
+                      {profileData.maritalStatus === 'Married' && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2">
+                          <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Spouse's Name</label>
+                          <input type="text" value={profileData.spouseName} onChange={(e) => setProfileData({ ...profileData, spouseName: e.target.value })}
+                            className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                          />
+                        </motion.div>
+                      )}
+
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Children</label>
+                          <button type="button" onClick={addChild} className="text-xs font-black text-primary-600 uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 rounded-lg hover:bg-primary-100 transition-colors">
+                            <Plus className="w-3.5 h-3.5" /> Add Child
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {profileData.children.map((child, idx) => (
+                            <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex gap-4 items-center">
+                              <input 
+                                type="text" placeholder="Child's Name" value={child.name} 
+                                onChange={(e) => updateChild(idx, 'name', e.target.value)}
+                                className="flex-1 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-xl border border-zinc-100 dark:border-zinc-800 font-bold text-sm"
+                              />
+                              <input 
+                                type="text" placeholder="Age" value={child.age} 
+                                onChange={(e) => updateChild(idx, 'age', e.target.value)}
+                                className="w-20 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-xl border border-zinc-100 dark:border-zinc-800 font-bold text-sm text-center"
+                              />
+                              <button type="button" onClick={() => removeChild(idx)} className="p-2 text-zinc-400 hover:text-red-500 transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </motion.div>
+                          ))}
+                          {profileData.children.length === 0 && (
+                            <p className="text-sm text-zinc-400 font-medium italic p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 text-center">No children listed.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-span-full space-y-4 pt-8 border-t border-zinc-100 dark:border-zinc-800">
                       <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Profile Visuals</label>
                       <div className="flex items-center gap-6">
                         <div className="relative group">
@@ -335,16 +518,21 @@ export default function Settings() {
               <Shield className="w-5 h-5 mr-3 text-zinc-400" /> System Rank
             </h3>
             <div className="bg-gradient-to-br from-primary-500 to-indigo-600 p-8 rounded-[2rem] text-center shadow-lg shadow-primary-500/20">
-              <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Current Title</p>
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Church Rank</p>
               <p className="text-white text-3xl font-black tracking-tighter mb-4 uppercase">
-                {user?.role || 'MEMBER'}
+                {profileData.membershipStatus || 'MEMBER'}
               </p>
-              <div className="h-1 w-12 bg-white/20 mx-auto rounded-full mb-4" />
-              <p className="text-white/80 text-sm font-medium leading-relaxed">
-                {user?.role === 'ADMIN'
-                  ? 'Elevated access for system administration and church oversight.'
-                  : 'Standard access for viewing events and tracking individual giving.'}
-              </p>
+              <div className="h-1 w-12 bg-white/20 mx-auto rounded-full mb-6" />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-[10px] font-black text-white/40 uppercase tracking-widest">
+                  <span>Joined Date</span>
+                  <span className="text-white/90">{profileData.joinedDate ? new Date(profileData.joinedDate).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-black text-white/40 uppercase tracking-widest">
+                  <span>Account Type</span>
+                  <span className="text-white/90">{user?.role || 'USER'}</span>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>

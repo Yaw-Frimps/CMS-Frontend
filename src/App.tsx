@@ -32,13 +32,13 @@ function App() {
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<DashboardRouter />} />
                 <Route path="/events" element={<EventsList />} />
+                <Route path="/groups" element={<GroupsList />} />
                 <Route path="/settings" element={<Settings />} />
                 
                 {/* Admin Only Routes */}
                 <Route element={<ProtectedRoute requireAdmin />}>
                   <Route path="/members" element={<MembersList />} />
                   <Route path="/donations" element={<DonationsList />} />
-                  <Route path="/groups" element={<GroupsList />} />
                   <Route path="/gallery-manager" element={<GalleryManager />} />
                 </Route>
               </Route>
