@@ -3,26 +3,28 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Camera, Heart, Users, MapPin, Mail, Phone, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import churchInterior from '../../assets/church_interior_community.png';
+import smallGroup from '../../assets/small_group_community.png';
+import worship from '../../assets/joyful_worship_service.png';
 
 const carouselImages = [
   {
-    url: '/src/assets/church_interior_community.png', // Assuming images are moved here or I should use the absolute paths from the generate_image tool. 
-    // Actually, I'll use the absolute paths directly for now since I can't move them easily without knowing the assets dir structure.
-    // Wait, the generate_image tool saved them in the brain directory. I should probably move them to the frontend assets.
+    url: churchInterior,
     title: "A Community of Faith",
     subtitle: "Grow together in a space that loves and supports everyone."
   },
   {
-    url: '/src/assets/small_group_community.png',
+    url: smallGroup,
     title: "Connect in Small Groups",
     subtitle: "Find your people and deepen your journey with others."
   },
   {
-    url: '/src/assets/joyful_worship_service.png',
+    url: worship,
     title: "Uplifting Worship",
     subtitle: "Experience joyful and vibrant services every Sunday."
   }
 ];
+
 
 // NOTE: I need to move the images to frontend/src/assets first. 
 // I'll do that in a separate step or just use the absolute paths if the dev server can serve them.
@@ -127,7 +129,9 @@ export default function Landing() {
         {/* Carousel Controls */}
         <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center items-center gap-6">
           <button 
+            type="button"
             onClick={prevSlide}
+            aria-label="Previous slide"
             className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all border border-white/20"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -137,14 +141,18 @@ export default function Landing() {
             {carouselImages.map((_, idx) => (
               <button
                 key={idx}
+                type="button"
                 onClick={() => setCurrentSlide(idx)}
+                aria-label={`Go to slide ${idx + 1}`}
                 className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-primary-500 w-8' : 'bg-white/30 hover:bg-white/50'}`}
               />
             ))}
           </div>
 
           <button 
+            type="button"
             onClick={nextSlide}
+            aria-label="Next slide"
             className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all border border-white/20"
           >
             <ChevronRight className="w-6 h-6" />
