@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, DollarSign, Calendar, Settings, LogOut, Image as ImageIcon } from 'lucide-react';
+import { Home, Users, DollarSign, Calendar, Settings, LogOut, Image as ImageIcon, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
 
 export default function Sidebar() {
   const location = useLocation();
@@ -16,47 +17,66 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col shadow-sm z-20 transition-colors duration-300">
-      <div className="h-16 flex items-center px-6 border-b border-gray-50 dark:border-gray-800 transition-colors duration-300">
-        <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent transform transition-all hover:scale-105">
-          People Of Vision
+    <div className="w-72 bg-white dark:bg-zinc-900 border-r border-zinc-200/50 dark:border-zinc-800/50 flex flex-col z-40 transition-colors duration-500 relative">
+      <div className="h-20 flex items-center px-8">
+        <Link to="/" className="flex items-center space-x-3 group">
+          <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-600/30 group-hover:rotate-12 transition-transform duration-300">
+            <span className="text-white font-bold text-xl">P</span>
+          </div>
+          <span className="text-xl font-bold text-zinc-800 dark:text-zinc-100 tracking-tight">
+            POV <span className="text-primary-600 dark:text-primary-400">Int</span>
+          </span>
         </Link>
       </div>
       
-      <nav className="flex-1 py-6 px-4 space-y-2">
-        {navItems.map((item) => {
+      <nav className="flex-1 py-8 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+        {navItems.map((item, index) => {
           if (item.adminOnly && !isAdmin) return null;
           
           const isActive = location.pathname.startsWith(item.path);
           const Icon = item.icon;
           
           return (
-            <Link
+            <motion.div
               key={item.name}
-              to={item.path}
-              className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 group ${
-                isActive 
-                  ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium shadow-sm' 
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100'
-              }`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <Icon 
-                className={`w-5 h-5 mr-3 transition-colors ${
-                  isActive ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+              <Link
+                to={item.path}
+                className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative ${
+                  isActive 
+                    ? 'bg-primary-50 dark:bg-primary-900/10 text-primary-600 dark:text-primary-400 font-semibold' 
+                    : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }`}
-              />
-              {item.name}
-            </Link>
+              >
+                <div className="flex items-center">
+                  <div className={`mr-4 p-2 rounded-lg transition-colors ${
+                    isActive ? 'bg-primary-100 dark:bg-primary-500/20 text-primary-600' : 'bg-transparent text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'
+                  }`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  {item.name}
+                </div>
+                {isActive && (
+                  <motion.div layoutId="activeNav" className="absolute left-0 w-1 h-6 bg-primary-500 rounded-r-full" />
+                )}
+                <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isActive ? 'opacity-100' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 text-zinc-300 dark:text-zinc-600'}`} />
+              </Link>
+            </motion.div>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-50 dark:border-gray-800 transition-colors duration-300">
+      <div className="p-6 border-t border-zinc-100 dark:border-zinc-800/50">
         <button 
           onClick={logout}
-          className="flex w-full items-center px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group"
+          className="flex w-full items-center px-4 py-3.5 text-sm font-semibold text-zinc-500 dark:text-zinc-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-all group"
         >
-          <LogOut className="w-5 h-5 mr-3 text-red-400 dark:text-red-500 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors" />
+          <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 group-hover:bg-red-100 dark:group-hover:bg-red-900/20 mr-4 transition-colors">
+            <LogOut className="w-5 h-5 transition-colors" />
+          </div>
           Logout
         </button>
       </div>

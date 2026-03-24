@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api, getImageUrl } from '../../services/api';
-import { User, Lock, Shield, Mail, Loader2, X, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Shield, Mail, Loader2, X, Eye, EyeOff, Camera, Calendar, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Change Password Modal ──────────────────────────────────────────────────────
 function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () => void }) {
@@ -31,170 +32,96 @@ function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () 
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
       });
-      setSuccess('Password updated successfully!');
+      setSuccess('Password updated!');
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-      setTimeout(() => onClose(), 1800);
+      setTimeout(() => onClose(), 1500);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update password. Check your current password.');
+      setError(err.response?.data?.message || 'Update failed. Check current password.');
     } finally {
       setSaving(false);
     }
   };
 
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const inputClass =
-    'w-full pl-4 pr-10 py-2.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all duration-300';
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-              <Lock className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-            </div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Change Password</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-            aria-label="Close modal"
-          >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-zinc-950/40 backdrop-blur-md">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="glass p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl border border-white/20"
+      >
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">Security <span className="text-primary-600">Update</span></h2>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {success && (
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium border border-green-200 dark:border-green-800">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl text-sm font-bold border border-emerald-100 dark:border-emerald-900/30">
               ✓ {success}
-            </div>
+            </motion.div>
           )}
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium border border-red-200 dark:border-red-800">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-2xl text-sm font-bold border border-red-200 dark:border-red-800">
               {error}
-            </div>
+            </motion.div>
           )}
 
-          {/* Current Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Current Password
-            </label>
+          <div className="space-y-2">
+            <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Current Password</label>
             <div className="relative">
-              <input
-                type={showOld ? 'text' : 'password'}
-                required
-                placeholder="Enter your current password"
-                value={passwordData.oldPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
-                className={inputClass}
+              <input type={showOld ? 'text' : 'password'} required value={passwordData.oldPassword} onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
               />
-              <button
-                type="button"
-                onClick={() => setShowOld(!showOld)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                aria-label={showOld ? 'Hide password' : 'Show password'}
-              >
-                {showOld ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <button type="button" onClick={() => setShowOld(!showOld)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                {showOld ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
-          <div className="border-t border-gray-100 dark:border-gray-800 pt-4 space-y-4">
-            {/* New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                New Password
-              </label>
+          <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="space-y-2">
+              <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">New Password</label>
               <div className="relative">
-                <input
-                  type={showNew ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  placeholder="At least 6 characters"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                  className={inputClass}
+                <input type={showNew ? 'text' : 'password'} required minLength={6} value={passwordData.newPassword} onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowNew(!showNew)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                  aria-label={showNew ? 'Hide password' : 'Show password'}
-                >
-                  {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                  {showNew ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirm New Password
-              </label>
+            <div className="space-y-2">
+              <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Confirm New Password</label>
               <div className="relative">
-                <input
-                  type={showConfirm ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  placeholder="Re-enter new password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                  className={`${inputClass} ${
+                <input type={showConfirm ? 'text' : 'password'} required minLength={6} value={passwordData.confirmPassword} onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  className={`w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border ${
                     passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword
-                      ? 'border-red-400 dark:border-red-600 focus:ring-red-400'
-                      : passwordData.confirmPassword && passwordData.newPassword === passwordData.confirmPassword
-                      ? 'border-green-400 dark:border-green-600 focus:ring-green-400'
-                      : ''
-                  }`}
+                      ? 'border-red-400 focus:ring-red-500/20'
+                      : 'border-zinc-200 dark:border-zinc-800 focus:ring-primary-500/20'
+                  } focus:border-primary-500 outline-none transition-all font-bold`}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                  aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                >
-                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              {passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
-                <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
-              )}
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
+          <div className="flex justify-end gap-4 pt-4">
+            <button type="button" onClick={onClose} className="px-6 py-3 text-zinc-600 dark:text-zinc-400 font-bold hover:text-zinc-900 transition-colors">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-5 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2 disabled:opacity-70"
-            >
-              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-              Update Password
+            <button type="submit" disabled={saving} className="px-8 py-3 bg-primary-600 text-white rounded-2xl font-black shadow-xl shadow-primary-600/20 hover:bg-primary-500 transition-all flex items-center gap-2 disabled:opacity-50">
+              {saving && <Loader2 className="w-5 h-5 animate-spin" />}
+              Update Account
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -202,36 +129,24 @@ function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () 
 // ── Settings Page ──────────────────────────────────────────────────────────────
 export default function Settings() {
   const { user, updateUser } = useAuth();
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-
-  const [profileData, setProfileData] = useState({
-    dateOfBirth: '',
-    profileImageUrl: '',
-  });
-
+  const [profileData, setProfileData] = useState({ dateOfBirth: '', profileImageUrl: '' });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user?.memberId) {
-        setLoading(false);
-        return;
-      }
+      if (!user?.memberId) { setLoading(false); return; }
       try {
         const res = await api.get(`/members/${user.memberId}`);
         setProfileData({
           dateOfBirth: res.data.dateOfBirth || '',
           profileImageUrl: res.data.profileImageUrl || '',
         });
-        if (res.data.profileImageUrl) {
-          setImagePreview(res.data.profileImageUrl);
-        }
+        if (res.data.profileImageUrl) setImagePreview(res.data.profileImageUrl);
       } catch (error) {
         console.error('Failed to load profile', error);
       } finally {
@@ -244,15 +159,10 @@ export default function Settings() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { alert('Please select a valid image file'); return; }
-    if (file.size > 10 * 1024 * 1024) { alert('File size must be less than 10MB'); return; }
+    if (!file.type.startsWith('image/')) { alert('Select an image.'); return; }
     setSelectedFile(file);
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      console.log('Local image preview generated:', result.substring(0, 50) + '...');
-      setImagePreview(result);
-    };
+    reader.onloadend = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(file);
   };
 
@@ -262,227 +172,183 @@ export default function Settings() {
     try {
       setSaving(true);
       setSuccessMsg('');
-
       if (selectedFile) {
-        // Build FormData and explicitly clear the Content-Type so axios sets
-        // the correct multipart/form-data boundary automatically.
         const formData = new FormData();
         formData.append('profileImage', selectedFile);
-        if (profileData.dateOfBirth) {
-          formData.append('dateOfBirth', profileData.dateOfBirth);
-        }
-
-        const response = await api.post(
-          `/members/${user.memberId}/profile-image`,
-          formData,
-          {
-            headers: {
-              // Delete the global application/json default so axios can set
-              // multipart/form-data with the correct boundary itself.
-              'Content-Type': undefined,
-            },
-          }
-        );
-
-        const imageUrl =
-          response.data.profileImageUrl ||
-          response.data.imageUrl ||
-          response.data.url;
-          
-        if (!imageUrl) throw new Error('Server did not return an image URL');
-
+        if (profileData.dateOfBirth) formData.append('dateOfBirth', profileData.dateOfBirth);
+        const response = await api.post(`/members/${user.memberId}/profile-image`, formData, { headers: { 'Content-Type': undefined } });
+        const imageUrl = response.data.profileImageUrl || response.data.imageUrl || response.data.url;
+        if (!imageUrl) throw new Error('No image URL returned');
         setProfileData((prev) => ({ ...prev, profileImageUrl: imageUrl }));
         setImagePreview(imageUrl);
         setSelectedFile(null);
-
-        // Update the user object in AuthContext to persist the new profile image URL
         updateUser({ profileImageUrl: imageUrl });
-
-        window.dispatchEvent(
-          new CustomEvent('profileUpdated', { detail: { profileImageUrl: imageUrl } })
-        );
+        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profileImageUrl: imageUrl } }));
       } else {
-        await api.put(`/members/${user.memberId}/profile`, {
-          dateOfBirth: profileData.dateOfBirth,
-        });
+        await api.put(`/members/${user.memberId}/profile`, { dateOfBirth: profileData.dateOfBirth });
       }
-
       setSuccessMsg('Profile updated successfully!');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || 'Failed to update profile';
-      alert(`Failed to update profile: ${msg}`);
+      alert(`Error: ${error.message}`);
     } finally {
       setSaving(false);
     }
   };
 
-  return (
-    <div className="p-8">
-      {showPasswordModal && (
-        <ChangePasswordModal userId={user?.id ?? 0} onClose={() => setShowPasswordModal(false)} />
-      )}
+  const container = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 transition-colors duration-300">
-          Account Settings
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">
-          Manage your profile, security, and preferences.
-        </p>
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  return (
+    <div className="space-y-10">
+      <AnimatePresence>
+        {showPasswordModal && (
+          <ChangePasswordModal userId={user?.id ?? 0} onClose={() => setShowPasswordModal(false)} />
+        )}
+      </AnimatePresence>
+
+      <div>
+        <h1 className="text-4xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight mb-2">Account <span className="text-gradient">Settings</span></h1>
+        <p className="text-zinc-500 font-medium tracking-tight">Configure preferences, update security, and manage your church profile.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Profile Card */}
-        <div className="md:col-span-2 space-y-6">
-          <div className="glass p-8 rounded-2xl relative overflow-hidden transition-colors duration-300">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 dark:bg-primary-900/20 rounded-bl-full z-0 opacity-50 transition-colors duration-300" />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 relative z-10 flex items-center transition-colors duration-300">
-              <User className="w-5 h-5 mr-2 text-primary-500" />
-              Profile Information
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+      >
+        <div className="lg:col-span-2 space-y-8">
+          <motion.div variants={item} className="glass-card p-10 border border-white/40 dark:border-zinc-800/50 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/5 rounded-bl-full -mr-10 -mt-10 blur-2xl" />
+            
+            <h3 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 mb-8 flex items-center">
+              <User className="w-6 h-6 mr-3 text-primary-500" /> Personal Identity
             </h3>
 
-            <div className="space-y-4 relative z-10">
+            <div className="space-y-8 relative z-10">
               {successMsg && (
-                <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm font-medium mb-4">
-                  {successMsg}
-                </div>
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl font-bold flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5" /> {successMsg}
+                </motion.div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5 transition-colors duration-300" />
-                  <input
-                    type="email"
-                    value={user?.email || ''}
-                    disabled
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 cursor-not-allowed transition-colors duration-300"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 transition-colors duration-300">
-                  To change your email address, please contact an administrator.
-                </p>
-              </div>
-
-              {loading ? (
-                <div className="py-8 flex justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleUpdateProfile}
-                  className="space-y-4 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800 transition-colors duration-300"
-                >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300">
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      value={profileData.dateOfBirth}
-                      onChange={(e) =>
-                        setProfileData({ ...profileData, dateOfBirth: e.target.value })
-                      }
-                      className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all duration-300 cursor-pointer"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                    <input type="email" value={user?.email || ''} disabled
+                      className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-400 cursor-not-allowed font-medium"
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300">
-                      Profile Image
-                    </label>
-                    <div className="space-y-3">
-                      {imagePreview && (
-                        <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-primary-100 dark:border-primary-900/30 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
-                          <img
-                            src={imagePreview.startsWith('data:') ? imagePreview : getImageUrl(imagePreview) || ''}
-                            alt="Profile preview"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              console.error("Preview image failed to load. URL:", imagePreview);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 dark:file:bg-primary-900/20 file:text-primary-700 dark:file:text-primary-400 hover:file:bg-primary-100 dark:hover:file:bg-primary-900/30 cursor-pointer"
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                        Accepted formats: JPG, PNG, GIF, WebP. Max size: 5MB
-                      </p>
-                    </div>
+                {loading ? (
+                  <div className="flex items-center justify-center p-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
                   </div>
+                ) : (
+                  <form onSubmit={handleUpdateProfile} className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                        <input type="date" value={profileData.dateOfBirth} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })}
+                          className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
 
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="mt-6 px-5 py-2.5 bg-primary-600 text-white rounded-lg shadow-sm hover:bg-primary-700 transition font-medium flex items-center"
-                  >
-                    {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Save Profile
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
+                    <div className="col-span-full space-y-4">
+                      <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Profile Visuals</label>
+                      <div className="flex items-center gap-6">
+                        <div className="relative group">
+                          <div className="w-24 h-24 rounded-[2rem] overflow-hidden border-4 border-white dark:border-zinc-800 shadow-xl bg-zinc-100 dark:bg-zinc-800">
+                            {imagePreview ? (
+                              <img src={imagePreview.startsWith('data:') ? imagePreview : getImageUrl(imagePreview) || ''} alt="Preview" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-zinc-300"><User className="w-10 h-10" /></div>
+                            )}
+                          </div>
+                          <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary-600 text-white rounded-2xl flex items-center justify-center cursor-pointer shadow-lg hover:bg-primary-500 transition-colors">
+                            <Camera className="w-5 h-5" />
+                            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                          </label>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-zinc-500 font-medium text-sm leading-relaxed">Personalize your account with a clear photo. This helps leaders recognize you in group activities.</p>
+                          <p className="text-[10px] text-zinc-400 font-black uppercase mt-2">JPG, PNG or WebP • Max 5MB</p>
+                        </div>
+                      </div>
+                    </div>
 
-          {/* Security Card */}
-          <div className="glass p-8 rounded-2xl transition-colors duration-300">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center transition-colors duration-300">
-              <Lock className="w-5 h-5 mr-2 text-primary-500" />
-              Security
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors duration-300">
-              Keep your account secure by using a strong, unique password.
-            </p>
-
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-              <div>
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 transition-colors duration-300">
-                  Password
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 transition-colors duration-300">
-                  Last changed: unknown
-                </p>
+                    <div className="col-span-full pt-4">
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" disabled={saving}
+                        className="px-10 py-3.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-2xl font-black shadow-xl transition-all hover:bg-black dark:hover:bg-white flex items-center gap-3 disabled:opacity-50"
+                      >
+                        {saving && <Loader2 className="w-5 h-5 animate-spin" />} Save Profile
+                      </motion.button>
+                    </div>
+                  </form>
+                )}
               </div>
-              <button
+            </div>
+          </motion.div>
+
+          <motion.div variants={item} className="glass-card p-10 border border-white/40 dark:border-zinc-800/50">
+            <h3 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 mb-2 flex items-center">
+              <Shield className="w-6 h-6 mr-3 text-primary-500" /> Digital Security
+            </h3>
+            <p className="text-zinc-500 font-medium mb-8">Maintain a strong shield for your data and activities.</p>
+
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 bg-zinc-50/50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 gap-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 flex items-center justify-center mr-4 shadow-sm">
+                  <Lock className="w-6 h-6 text-zinc-400" />
+                </div>
+                <div>
+                  <p className="font-black text-zinc-900 dark:text-zinc-50">Account Password</p>
+                  <p className="text-xs text-zinc-400 font-bold mt-1 uppercase tracking-wider">Regular updates recommended</p>
+                </div>
+              </div>
+              <button 
                 onClick={() => setShowPasswordModal(true)}
-                className="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                className="w-full md:w-auto px-6 py-3 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-700 rounded-2xl font-black hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all shadow-sm"
               >
-                <Lock className="w-3.5 h-3.5" />
-                Change Password
+                Modify Password
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Side Info */}
-        <div className="space-y-6">
-          <div className="glass p-6 rounded-2xl transition-colors duration-300">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center transition-colors duration-300">
-              <Shield className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
-              Account Role
+        <div className="space-y-8">
+          <motion.div variants={item} className="glass-card p-8 border border-white/40 dark:border-zinc-800/50">
+            <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-50 mb-6 flex items-center">
+              <Shield className="w-5 h-5 mr-3 text-zinc-400" /> System Rank
             </h3>
-            <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800/50 p-4 rounded-xl text-center transition-colors duration-300">
-              <p className="text-primary-800 dark:text-primary-400 font-bold uppercase tracking-widest">
-                {user?.role || 'USER'}
+            <div className="bg-gradient-to-br from-primary-500 to-indigo-600 p-8 rounded-[2rem] text-center shadow-lg shadow-primary-500/20">
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Current Title</p>
+              <p className="text-white text-3xl font-black tracking-tighter mb-4 uppercase">
+                {user?.role || 'MEMBER'}
               </p>
-              <p className="text-primary-600 dark:text-primary-500 text-sm mt-1">
+              <div className="h-1 w-12 bg-white/20 mx-auto rounded-full mb-4" />
+              <p className="text-white/80 text-sm font-medium leading-relaxed">
                 {user?.role === 'ADMIN'
-                  ? 'Full access to all system features.'
-                  : 'Standard user access.'}
+                  ? 'Elevated access for system administration and church oversight.'
+                  : 'Standard access for viewing events and tracking individual giving.'}
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

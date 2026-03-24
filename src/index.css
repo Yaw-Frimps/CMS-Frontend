@@ -3,33 +3,63 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 font-sans antialiased dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300;
+    @apply bg-zinc-50 text-zinc-900 font-sans antialiased dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-500;
+  }
+  
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom selection color */
+  ::selection {
+    @apply bg-primary-500/30 text-primary-900 dark:text-primary-100;
   }
 }
 
 /* Custom micro-animations and glassy effects */
-@layer utilities {
-  .glass {
-    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-800/50 shadow-xl transition-colors duration-300;
+@utility glass {
+  @apply bg-white/80 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/40 dark:border-zinc-800/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] transition-all duration-300;
+}
+
+@utility glass-card {
+  @apply glass hover:shadow-2xl hover:shadow-primary-500/10 dark:hover:shadow-primary-500/5 hover:-translate-y-1 rounded-2xl;
+}
+
+@utility text-gradient {
+  @apply bg-gradient-to-br from-primary-600 to-secondary-500 dark:from-primary-400 dark:to-secondary-300 bg-clip-text text-transparent;
+}
+
+@utility animate-blob {
+  animation: blob 7s infinite;
+}
+
+@utility animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+@utility animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
   }
-  .glass-dark {
-    @apply bg-gray-900/80 backdrop-blur-md border border-gray-800/50 shadow-2xl;
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
   }
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
   }
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out;
+  100% {
+    transform: translate(0px, 0px) scale(1);
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {

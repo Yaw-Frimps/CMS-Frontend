@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { Calendar as CalendarIcon, MapPin, Clock, Users, Plus, X, Loader2, Trash2, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EventsList() {
   const { isAdmin } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ export default function EventsList() {
     endTime: ''
   });
 
-  // Attendance State
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [members, setMembers] = useState<any[]>([]);
@@ -72,8 +71,6 @@ export default function EventsList() {
     setSelectedMemberId('');
     setAttendanceSuccess('');
     setIsAttendanceModalOpen(true);
-    
-    // Fetch members if not already fetched
     if (members.length === 0) {
       try {
         const res = await api.get('/members');
@@ -87,7 +84,6 @@ export default function EventsList() {
   const handleMarkAttendance = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEventId || !selectedMemberId) return;
-
     try {
       setAttendanceLoading(true);
       setAttendanceSuccess('');
@@ -97,11 +93,11 @@ export default function EventsList() {
         notes: "Marked by Admin",
         checkInTime: new Date().toISOString()
       });
-      setAttendanceSuccess('Attendance recorded successfully!');
+      setAttendanceSuccess('Attendance recorded!');
       setSelectedMemberId('');
     } catch (error) {
       console.error('Failed to mark attendance', error);
-      alert('Failed to record attendance or member already checked in.');
+      alert('Failed to record attendance.');
     } finally {
       setAttendanceLoading(false);
     }
@@ -112,10 +108,7 @@ export default function EventsList() {
     try {
       setIsSubmitting(true);
       await api.post('/events', {
-        title: formData.title,
-        description: formData.description,
-        location: formData.location,
-        imageUrl: formData.imageUrl,
+        ...formData,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString()
       });
@@ -123,245 +116,281 @@ export default function EventsList() {
       fetchEvents();
     } catch (error) {
       console.error('Failed to create event', error);
-      alert('Failed to create event. Check console for details.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 transition-colors duration-300">Events & Calendar</h1>
-          <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">Manage church services, meetings, and special events.</p>
+          <h1 className="text-4xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight mb-2">Events & <span className="text-gradient">Calendar</span></h1>
+          <p className="text-zinc-500 font-medium">Coordinate services, community outreach, and special gatherings.</p>
         </div>
         {isAdmin && (
-          <button onClick={handleOpenAdd} className="px-5 py-2.5 bg-primary-600 text-white rounded-lg shadow-md hover:bg-primary-700 transition font-medium flex items-center">
-            <Plus className="w-5 h-5 mr-2" /> Create Event
-          </button>
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleOpenAdd} 
+            className="px-6 py-3 bg-primary-600 text-white rounded-2xl shadow-xl shadow-primary-600/20 hover:bg-primary-500 transition-all font-bold flex items-center group"
+          >
+            <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" /> Create Event
+          </motion.button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {/* New Event Card Design */}
-        {isLoading ? (
-          <div className="col-span-full py-12 flex justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-          </div>
-        ) : events.length > 0 ? events.map(event => (
-          <div key={event.id} className="glass rounded-2xl flex flex-col group hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-            {/* Header / Background Image area */}
-            <div className="relative h-48 w-full bg-gray-100 overflow-hidden rounded-t-2xl">
-              {event.imageUrl ? (
-                <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-              ) : (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-100 rounded-bl-full z-0 transition-transform duration-500 group-hover:scale-110"></div>
-              )}
-              {/* Overlay gradient for text readability if image exists */}
-              {event.imageUrl && <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>}
-            </div>
-
-            <div className="p-6 flex flex-col flex-grow relative z-10 -mt-12 transition-colors duration-300">
-              <div className="flex items-start justify-between mb-4">
-                <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-xl text-center shadow-md border border-gray-100 dark:border-gray-700 transition-colors duration-300">
-                  <p className="text-xs font-bold text-red-500 uppercase">{new Date(event.startTime).toLocaleString('default', { month: 'short' })}</p>
-                  <p className="text-xl font-extrabold text-gray-800 dark:text-gray-100">{new Date(event.startTime).getDate()}</p>
-                </div>
-                <span className="px-3 py-1 bg-green-100/90 dark:bg-green-900/40 backdrop-blur-sm text-green-700 dark:text-green-400 text-xs font-semibold rounded-full shadow-sm transition-colors duration-300">
-                  {new Date(event.startTime) > new Date() ? 'Upcoming' : 'Past'}
-                </span>
-              </div>
-            
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 relative z-10 transition-colors duration-300">{event.title}</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 line-clamp-2 relative z-10 break-words transition-colors duration-300">{event.description}</p>
-            
-            <div className="mt-auto space-y-3 relative z-10">
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                <Clock className="w-4 h-4 mr-2 text-primary-500" /> 
-                {new Date(event.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                {new Date(event.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                <MapPin className="w-4 h-4 mr-2 text-primary-500" /> {event.location}
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center relative z-10 transition-colors duration-300">
-              <div className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                <Users className="w-4 h-4 mr-1.5" /> 0 Registered
-              </div>
-              {isAdmin && (
-                <div className="flex space-x-3">
-                  <button 
-                    onClick={() => handleOpenAttendance(event.id)}
-                    className="text-primary-600 dark:text-primary-400 font-medium text-sm flex items-center hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-300"
-                    title="Take Attendance"
-                  >
-                    <ClipboardCheck className="w-4 h-4 mr-1" />
-                    Attendance
-                  </button>
-                  <button className="text-gray-600 dark:text-gray-400 font-medium text-sm hover:text-gray-900 dark:hover:text-gray-200 transition-colors duration-300">Manage</button>
-                  <button onClick={() => handleDelete(event.id)} className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors duration-300" aria-label="Delete event">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-10 h-10 animate-spin text-primary-500" />
         </div>
-        )) : (
-          <div className="col-span-full glass p-12 text-center rounded-2xl flex flex-col items-center justify-center transition-colors duration-300">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400 dark:text-gray-500 transition-colors duration-300">
-              <CalendarIcon className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">No Events Scheduled</h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-sm transition-colors duration-300">Get started by creating your first church event, service, or group meeting.</p>
-          </div>
-        )}
-      </div>
-
-      {/* Event Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl transition-colors duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Event</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300" aria-label="Close modal">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
-                <input 
-                  required 
-                  type="text" 
-                  value={formData.title} 
-                  onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300"
-                />
+      ) : (
+        <motion.div 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+        >
+          {events.length > 0 ? events.map(event => (
+            <motion.div 
+              variants={item}
+              key={event.id} 
+              className="glass-card flex flex-col group overflow-hidden border border-white/40 dark:border-zinc-800/50"
+            >
+              <div className="relative h-56 w-full bg-zinc-100 dark:bg-zinc-900">
+                {event.imageUrl ? (
+                  <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800">
+                    <CalendarIcon className="w-12 h-12 text-zinc-300 dark:text-zinc-700" />
+                  </div>
+                )}
+                <div className="absolute top-4 left-4">
+                  <div className="glass px-3 py-2 rounded-2xl text-center shadow-xl border border-white/20">
+                    <p className="text-[10px] font-black text-primary-500 uppercase tracking-widest">{new Date(event.startTime).toLocaleString('default', { month: 'short' })}</p>
+                    <p className="text-xl font-black text-zinc-900 dark:text-zinc-50">{new Date(event.startTime).getDate()}</p>
+                  </div>
+                </div>
+                <div className="absolute bottom-4 right-4">
+                  <span className={`px-4 py-1.5 backdrop-blur-md text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 shadow-xl ${
+                    new Date(event.startTime) > new Date() 
+                    ? 'bg-emerald-500/80 text-white' 
+                    : 'bg-zinc-800/80 text-zinc-300'
+                  }`}>
+                    {new Date(event.startTime) > new Date() ? 'Upcoming' : 'Completed'}
+                  </span>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                <input 
-                  required 
-                  type="text" 
-                  value={formData.location} 
-                  onChange={e => setFormData({...formData, location: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300"
-                />
-              </div>
+              <div className="p-8 flex flex-col flex-grow">
+                <h3 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 mb-3 leading-tight transition-colors group-hover:text-primary-600 dark:group-hover:text-primary-400">{event.title}</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 line-clamp-2 leading-relaxed font-medium">{event.description}</p>
+                
+                <div className="mt-auto space-y-4">
+                  <div className="flex items-center text-sm font-bold text-zinc-600 dark:text-zinc-300">
+                    <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mr-3">
+                      <Clock className="w-4 h-4 text-primary-500" />
+                    </div>
+                    {new Date(event.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                    {new Date(event.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                  <div className="flex items-center text-sm font-bold text-zinc-600 dark:text-zinc-300">
+                    <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mr-3">
+                      <MapPin className="w-4 h-4 text-primary-500" />
+                    </div>
+                    {event.location}
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image URL (Optional)</label>
-                <input 
-                  type="url" 
-                  value={formData.imageUrl} 
-                  onChange={e => setFormData({...formData, imageUrl: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300"
-                  placeholder="https://example.com/image.jpg"
-                />
+                <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
+                  <div className="flex items-center text-xs font-black text-zinc-400 uppercase tracking-widest">
+                    <Users className="w-3.5 h-3.5 mr-2" /> 0 Registered
+                  </div>
+                  {isAdmin && (
+                    <div className="flex items-center gap-2">
+                       <button 
+                        onClick={() => handleOpenAttendance(event.id)}
+                        className="p-2.5 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm"
+                        title="Mark Attendance"
+                      >
+                        <ClipboardCheck className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(event.id)}
+                        className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                        title="Delete Event"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )) : (
+            <div className="col-span-full glass-card p-20 text-center flex flex-col items-center justify-center">
+              <div className="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-3xl flex items-center justify-center mb-6 text-zinc-300">
+                <CalendarIcon className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 mb-3">No Events Scheduled</h3>
+              <p className="text-zinc-500 font-medium max-w-xs mb-8">Ready to bring the community together? Create your first event now.</p>
+              {isAdmin && (
+                <button onClick={handleOpenAdd} className="px-8 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-2xl font-black transition-all hover:scale-105 active:scale-95">
+                  Get Started
+                </button>
+              )}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Modals with AnimatePresence */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-zinc-950/40 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="glass p-8 rounded-[2.5rem] w-full max-w-xl shadow-2xl border border-white/20"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">Create Event</h2>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
-                  <input 
-                    required 
-                    type="datetime-local" 
-                    value={formData.startTime} 
-                    onChange={e => setFormData({...formData, startTime: e.target.value})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300"
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Event Title</label>
+                  <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} 
+                    className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
-                  <input 
-                    required 
-                    type="datetime-local" 
-                    value={formData.endTime} 
-                    onChange={e => setFormData({...formData, endTime: e.target.value})}
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300"
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Location</label>
+                    <input required type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} 
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Image URL</label>
+                    <input type="url" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} placeholder="https://..."
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Start Time</label>
+                    <input required type="datetime-local" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} 
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">End Time</label>
+                    <input required type="datetime-local" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} 
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Description</label>
+                  <textarea required rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} 
+                    className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none resize-none transition-all"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                <textarea 
-                  required 
-                  rows={3}
-                  value={formData.description} 
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none transition-colors duration-300"
-                />
-              </div>
-
-              <div className="pt-4 flex justify-end space-x-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors">
-                  Cancel
-                </button>
-                <button disabled={isSubmitting} type="submit" className="px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-lg font-medium transition-colors flex items-center">
-                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Create Event
-                </button>
-              </div>
-            </form>
+                <div className="pt-4 flex justify-end gap-4">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 text-zinc-600 dark:text-zinc-400 font-bold hover:text-zinc-900 transition-colors">
+                    Cancel
+                  </button>
+                  <button disabled={isSubmitting} type="submit" className="px-8 py-3 bg-primary-600 text-white rounded-2xl font-black shadow-xl shadow-primary-600/20 hover:bg-primary-500 transition-all flex items-center">
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Event'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Attendance Modal */}
-      {isAttendanceModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl transition-colors duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mark Attendance</h2>
-              <button onClick={() => setIsAttendanceModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300" aria-label="Close attendance modal">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            {attendanceSuccess && (
-              <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm font-medium">
-                {attendanceSuccess}
+      <AnimatePresence>
+        {isAttendanceModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-zinc-950/40 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="glass p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl border border-white/20"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">Mark Attendance</h2>
+                <button onClick={() => setIsAttendanceModalOpen(false)} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-            )}
-
-            <form onSubmit={handleMarkAttendance} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Member</label>
-                <select 
-                  required
-                  value={selectedMemberId}
-                  onChange={(e) => setSelectedMemberId(Number(e.target.value))}
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300"
+              
+              {attendanceSuccess && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-2xl border border-emerald-100 dark:border-emerald-900/30"
                 >
-                  <option value="" disabled>-- Choose a member --</option>
-                  {members.map(member => (
-                    <option key={member.id} value={member.id}>
-                      {member.firstName} {member.lastName} ({member.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {attendanceSuccess}
+                </motion.div>
+              )}
 
-              <div className="pt-4 flex justify-end space-x-3">
-                <button type="button" onClick={() => setIsAttendanceModalOpen(false)} className="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors">
-                  Close
-                </button>
-                <button disabled={attendanceLoading || !selectedMemberId} type="submit" className="px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-lg font-medium transition-colors flex items-center disabled:opacity-50">
-                  {attendanceLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Record Attendance
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleMarkAttendance} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Select Member</label>
+                  <select 
+                    required
+                    value={selectedMemberId}
+                    onChange={(e) => setSelectedMemberId(Number(e.target.value))}
+                    className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all appearance-none"
+                  >
+                    <option value="" disabled>Choose a member</option>
+                    {members.map(member => (
+                      <option key={member.id} value={member.id}>
+                        {member.firstName} {member.lastName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="pt-4 flex justify-end gap-4">
+                  <button type="button" onClick={() => setIsAttendanceModalOpen(false)} className="px-6 py-3 text-zinc-600 dark:text-zinc-400 font-bold hover:text-zinc-900 transition-colors">
+                    Close
+                  </button>
+                  <button disabled={attendanceLoading || !selectedMemberId} type="submit" className="px-8 py-3 bg-primary-600 text-white rounded-2xl font-black shadow-xl shadow-primary-600/20 hover:bg-primary-500 transition-all flex items-center disabled:opacity-50">
+                    {attendanceLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Record Check-in'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
