@@ -232,43 +232,46 @@ export default function Landing() {
                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
              </div>
           ) : landingGallery.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {landingGallery.map((img, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {landingGallery.map((img) => (
                 <motion.div
                   key={img.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   whileHover={{ y: -5 }}
-                  className={`relative overflow-hidden rounded-3xl group ${i === 0 ? 'sm:col-span-2 lg:row-span-2 aspect-square' : 'aspect-video sm:aspect-square'}`}
+                  className="relative overflow-hidden rounded-2xl group aspect-square shadow-sm"
                 >
                   <img 
                     src={getImageUrl(img.imageUrl) || ''} 
                     alt={img.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                    <p className="text-white font-bold text-lg">{img.title}</p>
-                    <p className="text-gray-200 text-sm line-clamp-2">{img.description}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <p className="text-white font-bold text-sm truncate">{img.title}</p>
+                    <p className="text-gray-200 text-xs line-clamp-1">{img.description}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="col-span-2 row-span-2 group overflow-hidden rounded-3xl relative h-96">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="group overflow-hidden rounded-2xl relative aspect-square">
                 <img src="https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?q=80&w=1000&auto=format&fit=crop" alt="Church Service" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                  <p className="text-white font-bold text-xl">Sunday Worship</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-white font-bold text-sm">Sunday Worship</p>
                 </div>
               </div>
-              <div className="group overflow-hidden rounded-3xl relative h-44 md:h-auto">
+              <div className="group overflow-hidden rounded-2xl relative aspect-square">
                 <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000&auto=format&fit=crop" alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
-              <div className="group overflow-hidden rounded-3xl relative h-44 md:h-auto">
+              <div className="group overflow-hidden rounded-2xl relative aspect-square">
                 <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1000&auto=format&fit=crop" alt="Youth Group" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
-              <div className="col-span-2 group overflow-hidden rounded-3xl relative h-44 md:h-48">
+              <div className="group overflow-hidden rounded-2xl relative aspect-square">
                 <img src="https://images.unsplash.com/photo-1473186578172-c141e6798cf4?q=80&w=1000&auto=format&fit=crop" alt="Baptism" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              </div>
+              <div className="group overflow-hidden rounded-2xl relative aspect-square">
+                <img src="https://images.unsplash.com/photo-1454165833267-02300a496031?q=80&w=1000&auto=format&fit=crop" alt="Outreach" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
             </div>
           )}
