@@ -25,11 +25,6 @@ const carouselImages = [
   }
 ];
 
-
-// NOTE: I need to move the images to frontend/src/assets first. 
-// I'll do that in a separate step or just use the absolute paths if the dev server can serve them.
-// High likely the dev server won't serve from the brain dir. I'll move them.
-
 export default function Landing() {
   const { isAuthenticated } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
