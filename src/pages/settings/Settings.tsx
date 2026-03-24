@@ -136,8 +136,33 @@ export default function Settings() {
         await api.post(`/members/${user.memberId}/profile-image`, formData, { headers: { 'Content-Type': undefined } });
       }
 
-      await api.put(`/members/${user.memberId}/profile`, payload);
+      const res = await api.put(`/members/${user.memberId}/profile`, payload);
       
+      // Update local state with the returned data to ensure sync
+      const data = res.data;
+      let children = [];
+      try {
+        children = data.childrenData ? JSON.parse(data.childrenData) : [];
+      } catch (e) { console.error(e); }
+
+      setProfileData({
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        phone: data.phone || '',
+        address: data.address || '',
+        dateOfBirth: data.dateOfBirth || '',
+        profileImageUrl: data.profileImageUrl || '',
+        gender: data.gender || 'Other',
+        membershipStatus: data.membershipStatus || 'Member',
+        maritalStatus: data.maritalStatus || 'Single',
+        emergencyContact: data.emergencyContact || '',
+        spouseName: data.spouseName || '',
+        profession: data.profession || '',
+        joinedDate: data.joinedDate || '',
+        children: children
+      });
+      if (data.profileImageUrl) setImagePreview(data.profileImageUrl);
+
       setSuccessMsg('Profile updated successfully!');
       setTimeout(() => setSuccessMsg(''), 3000);
       
