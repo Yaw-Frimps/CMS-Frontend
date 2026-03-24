@@ -148,7 +148,7 @@ export default function GroupsList() {
                 {group.category || 'General'}
               </span>
               {isAdmin && (
-                <button onClick={() => handleDelete(group.id)} className="text-red-400 hover:text-red-600 transition">
+                <button onClick={() => handleDelete(group.id)} className="text-red-400 hover:text-red-600 transition" aria-label="Delete group">
                   <Trash2 className="w-4 h-4" />
                 </button>
               )}
@@ -169,6 +169,7 @@ export default function GroupsList() {
                     <button 
                       onClick={() => handleLeave(group.id)} 
                       className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors flex items-center"
+                      aria-label="Leave group"
                     >
                       <LogOut className="w-3 h-3 mr-1" /> Leave
                     </button>
@@ -176,6 +177,7 @@ export default function GroupsList() {
                     <button 
                       onClick={() => handleJoin(group.id)} 
                       className="px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-md transition-colors flex items-center"
+                      aria-label="Join group"
                     >
                       <LogIn className="w-3 h-3 mr-1" /> Join
                     </button>
@@ -201,7 +203,7 @@ export default function GroupsList() {
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Create Group</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600" aria-label="Close modal">
                 <X className="w-6 h-6" />
               </button>
             </div>

@@ -13,6 +13,8 @@ import EventsList from './pages/events/EventsList';
 import GroupsList from './pages/groups/GroupsList';
 import Settings from './pages/settings/Settings';
 import Landing from './pages/public/Landing';
+import Gallery from './pages/public/Gallery';
+import GalleryManager from './pages/admin/GalleryManager';
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
@@ -36,6 +39,7 @@ function App() {
                   <Route path="/members" element={<MembersList />} />
                   <Route path="/donations" element={<DonationsList />} />
                   <Route path="/groups" element={<GroupsList />} />
+                  <Route path="/gallery-manager" element={<GalleryManager />} />
                 </Route>
               </Route>
             </Route>

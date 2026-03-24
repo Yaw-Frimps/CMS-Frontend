@@ -145,8 +145,8 @@ export default function MembersList() {
                   {member.joinedDate ? new Date(member.joinedDate).toLocaleDateString() : 'Unknown'}
                 </td>
                 <td className="p-4 text-right">
-                  <button onClick={() => handleOpenEdit(member)} className="p-2 text-gray-400 hover:text-primary-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
-                  <button onClick={() => handleDelete(member.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => handleOpenEdit(member)} className="p-2 text-gray-400 hover:text-primary-600 transition-colors" aria-label="Edit member"><Edit2 className="w-4 h-4" /></button>
+                  <button onClick={() => handleDelete(member.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" aria-label="Delete member"><Trash2 className="w-4 h-4" /></button>
                 </td>
               </tr>
             )) : (
@@ -166,7 +166,7 @@ export default function MembersList() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">{editingMember ? 'Edit Member' : 'Add Member'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600" aria-label="Close modal">
                 <X className="w-6 h-6" />
               </button>
             </div>

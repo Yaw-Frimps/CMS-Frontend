@@ -1,48 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Camera, Heart, Users, MapPin, Mail, Phone, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { api, getImageUrl } from '../../services/api';
+import { Heart, Users, MapPin, Mail, Phone, ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import churchInterior from '../../assets/church_interior_community.png';
 import smallGroup from '../../assets/small_group_community.png';
 import worship from '../../assets/joyful_worship_service.png';
 
-const carouselImages = [
-  {
-    url: churchInterior,
-    title: "A Community of Faith",
-    subtitle: "Grow together in a space that loves and supports everyone."
-  },
-  {
-    url: smallGroup,
-    title: "Connect in Small Groups",
-    subtitle: "Find your people and deepen your journey with others."
-  },
-  {
-    url: worship,
-    title: "Uplifting Worship",
-    subtitle: "Experience joyful and vibrant services every Sunday."
-  }
-];
-
-
-// NOTE: I need to move the images to frontend/src/assets first. 
-// I'll do that in a separate step or just use the absolute paths if the dev server can serve them.
-// High likely the dev server won't serve from the brain dir. I'll move them.
+interface GalleryImage {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+}
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [heroImages, setHeroImages] = useState<GalleryImage[]>([]);
+  const [landingGallery, setLandingGallery] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    const fetchData = async () => {
+      try {
+        const [heroRes, galleryRes] = await Promise.all([
+          api.get('/gallery/hero'),
+          api.get('/gallery/landing')
+        ]);
+        setHeroImages(heroRes.data);
+        setLandingGallery(galleryRes.data);
+      } catch (err) {
+        console.error('Failed to fetch landing data', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + carouselImages.length) % carouselImages.length);
+  const displayCarousel = useMemo(() => 
+    heroImages.length > 0 ? heroImages : [
+      { id: 1, imageUrl: churchInterior, title: "A Community of Faith", description: "Grow together in a space that loves and supports everyone." },
+      { id: 2, imageUrl: smallGroup, title: "Connect in Small Groups", description: "Find your people and deepen your journey with others." },
+      { id: 3, imageUrl: worship, title: "Uplifting Worship", description: "Experience joyful and vibrant services every Sunday." }
+    ]
+  , [heroImages]);
+
+  useEffect(() => {
+    if (displayCarousel.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % displayCarousel.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [displayCarousel]);
+
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % displayCarousel.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + displayCarousel.length) % displayCarousel.length);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 selection:bg-primary-200 dark:selection:bg-primary-900/50 transition-colors duration-300">
@@ -93,10 +108,10 @@ export default function Landing() {
               transition={{ duration: 1.5, ease: "easeInOut" }}
               className="absolute inset-0"
             >
-              <div className="absolute inset-0 bg-black/40 z-10" /> {/* Dark overlay */}
+              <div className="absolute inset-0 bg-black/40 z-10" />
               <img 
-                src={carouselImages[currentSlide].url} 
-                alt={carouselImages[currentSlide].title}
+                src={getImageUrl(displayCarousel[currentSlide].imageUrl) || displayCarousel[currentSlide].imageUrl} 
+                alt={displayCarousel[currentSlide].title}
                 className="w-full h-full object-cover"
               />
             </motion.div>
@@ -112,11 +127,11 @@ export default function Landing() {
             transition={{ duration: 0.8, delay: 0.5 }}
           >
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 drop-shadow-lg">
-              <span className="block">{carouselImages[currentSlide].title}</span>
+              <span className="block">{displayCarousel[currentSlide].title}</span>
               <span className="block bg-gradient-to-r from-primary-400 to-secondary-300 bg-clip-text text-transparent mt-2">People Of Vision International</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-100 drop-shadow-md">
-              {carouselImages[currentSlide].subtitle}
+              {displayCarousel[currentSlide].description}
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Link to={isAuthenticated ? '/dashboard' : '/register'} className="px-8 py-4 bg-white text-gray-900 text-lg font-medium rounded-full shadow-xl hover:bg-gray-100 hover:-translate-y-1 transition-all flex items-center gap-2">
@@ -127,37 +142,39 @@ export default function Landing() {
         </div>
 
         {/* Carousel Controls */}
-        <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center items-center gap-6">
-          <button 
-            type="button"
-            onClick={prevSlide}
-            aria-label="Previous slide"
-            className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all border border-white/20"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          
-          <div className="flex gap-2">
-            {carouselImages.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrentSlide(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-primary-500 w-8' : 'bg-white/30 hover:bg-white/50'}`}
-              />
-            ))}
-          </div>
+        {displayCarousel.length > 1 && (
+          <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center items-center gap-6">
+            <button 
+              type="button"
+              onClick={prevSlide}
+              className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all border border-white/20"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <div className="flex gap-2">
+              {displayCarousel.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCurrentSlide(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-primary-500 w-8' : 'bg-white/30 hover:bg-white/50'}`}
+                />
+              ))}
+            </div>
 
-          <button 
-            type="button"
-            onClick={nextSlide}
-            aria-label="Next slide"
-            className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all border border-white/20"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        </div>
+            <button 
+              type="button"
+              onClick={nextSlide}
+              className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all border border-white/20"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        )}
       </section>
 
       {/* About Us */}
@@ -198,29 +215,72 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl transition-colors duration-300">Gallery</h2>
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl transition-colors duration-300">Gallery Highlights</h2>
               <p className="mt-4 text-xl text-gray-500 dark:text-gray-400 transition-colors duration-300">Moments from our church life.</p>
             </div>
-            <div className="hidden sm:flex w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full items-center justify-center text-gray-400 dark:text-gray-500 transition-colors duration-300">
-              <Camera className="w-6 h-6" />
-            </div>
+            <Link 
+              to="/gallery"
+              className="hidden sm:flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-full hover:bg-primary-600 hover:text-white transition-all group"
+            >
+              View Full Gallery
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="col-span-2 row-span-2 group overflow-hidden rounded-3xl relative h-96">
-              <img src="https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?q=80&w=1000&auto=format&fit=crop" alt="Church Service" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                <p className="text-white font-bold text-xl">Sunday Worship</p>
+          
+          {loading ? (
+             <div className="flex justify-center py-12">
+               <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+             </div>
+          ) : landingGallery.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {landingGallery.map((img, i) => (
+                <motion.div
+                  key={img.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  whileHover={{ y: -5 }}
+                  className={`relative overflow-hidden rounded-3xl group ${i === 0 ? 'sm:col-span-2 lg:row-span-2 aspect-square' : 'aspect-video sm:aspect-square'}`}
+                >
+                  <img 
+                    src={getImageUrl(img.imageUrl) || ''} 
+                    alt={img.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                    <p className="text-white font-bold text-lg">{img.title}</p>
+                    <p className="text-gray-200 text-sm line-clamp-2">{img.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="col-span-2 row-span-2 group overflow-hidden rounded-3xl relative h-96">
+                <img src="https://images.unsplash.com/photo-1438283173091-5dbf5c5a3206?q=80&w=1000&auto=format&fit=crop" alt="Church Service" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                  <p className="text-white font-bold text-xl">Sunday Worship</p>
+                </div>
+              </div>
+              <div className="group overflow-hidden rounded-3xl relative h-44 md:h-auto">
+                <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000&auto=format&fit=crop" alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              </div>
+              <div className="group overflow-hidden rounded-3xl relative h-44 md:h-auto">
+                <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1000&auto=format&fit=crop" alt="Youth Group" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              </div>
+              <div className="col-span-2 group overflow-hidden rounded-3xl relative h-44 md:h-48">
+                <img src="https://images.unsplash.com/photo-1473186578172-c141e6798cf4?q=80&w=1000&auto=format&fit=crop" alt="Baptism" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
               </div>
             </div>
-            <div className="group overflow-hidden rounded-3xl relative h-44 md:h-auto">
-              <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=1000&auto=format&fit=crop" alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-            </div>
-            <div className="group overflow-hidden rounded-3xl relative h-44 md:h-auto">
-              <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=1000&auto=format&fit=crop" alt="Youth Group" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-            </div>
-            <div className="col-span-2 group overflow-hidden rounded-3xl relative h-44 md:h-48">
-              <img src="https://images.unsplash.com/photo-1473186578172-c141e6798cf4?q=80&w=1000&auto=format&fit=crop" alt="Baptism" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-            </div>
+          )}
+
+          <div className="mt-12 text-center sm:hidden">
+            <Link 
+              to="/gallery"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-full font-bold shadow-lg shadow-primary-500/20"
+            >
+              View Full Gallery
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>

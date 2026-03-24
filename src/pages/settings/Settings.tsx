@@ -68,6 +68,7 @@ function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () 
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -104,6 +105,7 @@ function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () 
                 type="button"
                 onClick={() => setShowOld(!showOld)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                aria-label={showOld ? 'Hide password' : 'Show password'}
               >
                 {showOld ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -130,6 +132,7 @@ function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () 
                   type="button"
                   onClick={() => setShowNew(!showNew)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  aria-label={showNew ? 'Hide password' : 'Show password'}
                 >
                   {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -161,6 +164,7 @@ function ChangePasswordModal({ userId, onClose }: { userId: number; onClose: () 
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  aria-label={showConfirm ? 'Hide password' : 'Show password'}
                 >
                   {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -241,7 +245,7 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { alert('Please select a valid image file'); return; }
-    if (file.size > 5 * 1024 * 1024) { alert('File size must be less than 5MB'); return; }
+    if (file.size > 10 * 1024 * 1024) { alert('File size must be less than 10MB'); return; }
     setSelectedFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {

@@ -202,7 +202,7 @@ export default function EventsList() {
                     Attendance
                   </button>
                   <button className="text-gray-600 dark:text-gray-400 font-medium text-sm hover:text-gray-900 dark:hover:text-gray-200 transition-colors duration-300">Manage</button>
-                  <button onClick={() => handleDelete(event.id)} className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors duration-300">
+                  <button onClick={() => handleDelete(event.id)} className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors duration-300" aria-label="Delete event">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -227,7 +227,7 @@ export default function EventsList() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl transition-colors duration-300">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Event</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300" aria-label="Close modal">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -320,7 +320,7 @@ export default function EventsList() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl transition-colors duration-300">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mark Attendance</h2>
-              <button onClick={() => setIsAttendanceModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300">
+              <button onClick={() => setIsAttendanceModalOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300" aria-label="Close attendance modal">
                 <X className="w-6 h-6" />
               </button>
             </div>

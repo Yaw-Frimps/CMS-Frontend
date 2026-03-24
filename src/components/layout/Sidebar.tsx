@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, DollarSign, Calendar, Settings, LogOut } from 'lucide-react';
+import { Home, Users, DollarSign, Calendar, Settings, LogOut, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar() {
@@ -11,6 +11,7 @@ export default function Sidebar() {
     { name: 'Directory', path: '/members', icon: Users, adminOnly: true },
     { name: 'Financials', path: '/donations', icon: DollarSign, adminOnly: true },
     { name: 'Events', path: '/events', icon: Calendar, adminOnly: false },
+    { name: 'Gallery Manager', path: '/gallery-manager', icon: ImageIcon, adminOnly: true },
     { name: 'Settings', path: '/settings', icon: Settings, adminOnly: false },
   ];
 
