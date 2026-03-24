@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
-import { Search, Plus, Edit2, Trash2, Phone, X, Loader2, User as UserIcon, MapPin, Calendar, Mail, Layers, ChevronRight, ArrowUpDown, Info } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Phone, X, Loader2, User as UserIcon, MapPin, Calendar, Mail, Layers, ChevronRight, ArrowUpDown, Heart, Baby, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { getImageUrl } from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MembersList() {
@@ -295,63 +296,165 @@ export default function MembersList() {
                exit={{ opacity: 0, scale: 0.9, y: 30 }}
                className="glass p-0 rounded-[3rem] w-full max-w-2xl shadow-2xl border border-white/20 overflow-hidden"
             >
-              <div className="bg-gradient-to-br from-primary-600 to-indigo-700 p-12 text-white relative">
-                <button onClick={() => setIsDetailModalOpen(false)} className="absolute top-8 right-8 p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition-colors">
+              <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-800 p-12 text-white relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none" />
+                <button onClick={() => setIsDetailModalOpen(false)} className="absolute top-8 right-8 p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition-all hover:rotate-90 z-10">
                   <X className="w-6 h-6" />
                 </button>
-                <div className="flex items-center gap-8">
-                  <div className="w-32 h-32 rounded-[2rem] bg-white text-primary-600 text-5xl font-black flex items-center justify-center shadow-2xl uppercase">
-                    {(selectedMember.firstName?.[0] || '')}{(selectedMember.lastName?.[0] || '')}
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-8 relative z-10">
+                  <div className="w-40 h-40 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border-4 border-white/20 overflow-hidden shadow-2xl shrink-0 group">
+                    {selectedMember.profileImageUrl ? (
+                      <img 
+                        src={getImageUrl(selectedMember.profileImageUrl) || ''} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/40 bg-white/5 font-black text-5xl uppercase">
+                        {(selectedMember.firstName?.[0] || '')}{(selectedMember.lastName?.[0] || '')}
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <h2 className="text-4xl font-black tracking-tight">{selectedMember.firstName} {selectedMember.lastName}</h2>
-                    <p className="text-white/70 font-bold uppercase tracking-widest text-sm mt-2 flex items-center">
-                      <span className="bg-white/10 px-3 py-1 rounded-full mr-3">Member #{selectedMember.id}</span>
-                      {selectedMember.userId ? 'Account Verified' : 'No Online Account'}
-                    </p>
+                  <div className="text-center md:text-left">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+                      <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Member #{selectedMember.id}</span>
+                      {selectedMember.userId && (
+                        <span className="px-3 py-1 bg-emerald-400/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-400/20 text-emerald-300 flex items-center gap-1.5">
+                          <BadgeCheck className="w-3 h-3" /> Account Verified
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-5xl font-black tracking-tight leading-none mb-4">{selectedMember.firstName} {selectedMember.lastName}</h2>
+                    <p className="text-white/60 font-medium text-lg max-w-lg">{selectedMember.profession || 'Faithful Member of the Congregation'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-12 space-y-10">
-                <div className="grid grid-cols-2 gap-10">
-                  <div className="space-y-6">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Contact Details</label>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-50 flex items-center"><Phone className="w-4 h-4 mr-3 text-primary-500" /> {selectedMember.phone || 'N/A'}</p>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-50 flex items-center mt-2"><Mail className="w-4 h-4 mr-3 text-primary-500" /> {selectedMember.email || 'N/A'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Address</label>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-50 flex items-start"><MapPin className="w-4 h-4 mr-3 text-primary-500 mt-1 shrink-0" /> {selectedMember.address || 'Anonymous'}</p>
-                    </div>
+              <div className="p-12 space-y-12 bg-white dark:bg-zinc-950 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                {/* Information Sections */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <section>
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                        <UserIcon className="w-3.5 h-3.5 mr-2" /> Personal Summary
+                      </h4>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-600 flex items-center justify-center shrink-0"><MapPin className="w-5 h-5" /></div>
+                          <div>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Address</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm line-clamp-1">{selectedMember.address || 'Anonymous'}</p>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0"><ArrowUpDown className="w-5 h-5" /></div>
+                          <div>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Gender</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{selectedMember.gender || 'Not Specified'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                        <Layers className="w-3.5 h-3.5 mr-2" /> Ministry & Rank
+                      </h4>
+                      <div className="p-6 bg-zinc-900 dark:bg-zinc-900 rounded-3xl text-white shadow-xl shadow-zinc-900/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10"><Layers className="w-20 h-20" /></div>
+                        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">System Status</p>
+                        <p className="text-2xl font-black mb-4">{selectedMember.membershipStatus || 'MEMBER'}</p>
+                        <div className="space-y-2">
+                          {selectedMember.groupNames?.map((g: string) => (
+                            <div key={g} className="flex items-center text-xs font-bold text-white/70">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary-400 mr-2" /> {g}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </section>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Account History</label>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-50 flex items-center"><Calendar className="w-4 h-4 mr-3 text-primary-500" /> Member Since: {selectedMember.joinedDate ? new Date(selectedMember.joinedDate).toLocaleDateString() : '---'}</p>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-50 flex items-center mt-2"><Info className="w-4 h-4 mr-3 text-primary-500" /> Created: {selectedMember.accountCreatedAt ? new Date(selectedMember.accountCreatedAt).toLocaleDateString() : 'N/A'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Group Affiliations</label>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {selectedMember.groupNames && selectedMember.groupNames.length > 0 ? selectedMember.groupNames.map((g: string) => (
-                          <span key={g} className="px-3 py-1.5 bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded-xl text-xs font-black uppercase tracking-tight flex items-center">
-                            <Layers className="w-3 h-3 mr-2" /> {g}
-                          </span>
-                        )) : <p className="text-zinc-400 italic text-sm font-medium">No assigned groups</p>}
+                  <div className="space-y-8">
+                    <section>
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                        <Phone className="w-3.5 h-3.5 mr-2" /> Connection Info
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl">
+                          <Mail className="w-5 h-5 mr-3 text-primary-500" />
+                          <span className="font-bold text-zinc-900 dark:text-zinc-100">{selectedMember.email || 'No email available'}</span>
+                        </div>
+                        <div className="flex items-center p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl">
+                          <Phone className="w-5 h-5 mr-3 text-primary-500" />
+                          <span className="font-bold text-zinc-900 dark:text-zinc-100">{selectedMember.phone || 'No phone provided'}</span>
+                        </div>
+                        <div className="flex items-center p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-2xl">
+                          <ShieldAlert className="w-5 h-5 mr-3 text-red-500" />
+                          <div>
+                            <p className="text-[9px] font-black text-red-400 uppercase tracking-widest">Emergency Contact</p>
+                            <p className="font-bold text-red-700 dark:text-red-400 text-xs">{selectedMember.emergencyContact || 'None'}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                        <Heart className="w-3.5 h-3.5 mr-2" /> Family & Life
+                      </h4>
+                      <div className="p-6 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Marital Status</p>
+                            <p className="font-black text-zinc-900 dark:text-zinc-100 text-lg uppercase tracking-tight">{selectedMember.maritalStatus || 'Single'}</p>
+                          </div>
+                          <Heart className={`w-8 h-8 ${selectedMember.maritalStatus === 'Married' ? 'text-red-500 fill-red-500' : 'text-zinc-200 dark:text-zinc-800'}`} />
+                        </div>
+                        
+                        {selectedMember.maritalStatus === 'Married' && (
+                          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Spouse Name</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100">{selectedMember.spouseName || '---'}</p>
+                          </div>
+                        )}
+
+                        <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Children</p>
+                            <Baby className="w-4 h-4 text-zinc-300" />
+                          </div>
+                          <div className="space-y-2">
+                            {(() => {
+                              try {
+                                const children = selectedMember.childrenData ? JSON.parse(selectedMember.childrenData) : [];
+                                return children.length > 0 ? children.map((c: any, i: number) => (
+                                  <div key={i} className="flex justify-between items-center text-sm">
+                                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{c.name}</span>
+                                    <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-md text-[10px] font-black text-zinc-500 uppercase">{c.age} Years</span>
+                                  </div>
+                                )) : <p className="text-zinc-400 italic text-xs">No children listed</p>;
+                              } catch (e) {
+                                return <p className="text-zinc-400 italic text-xs">No data</p>;
+                              }
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    </section>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+                <div className="pt-10 border-t border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                   <div className="flex items-center gap-4 text-zinc-400">
+                      <Calendar className="w-5 h-5" />
+                      <p className="text-xs font-bold leading-relaxed">Member since {selectedMember.joinedDate ? new Date(selectedMember.joinedDate).toLocaleDateString() : 'the Beginning'}</p>
+                   </div>
                    <button 
                     onClick={() => setIsDetailModalOpen(false)}
-                    className="px-10 py-4 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-2xl font-black shadow-xl hover:-translate-y-1 transition-all"
+                    className="w-full md:w-auto px-12 py-4 bg-primary-600 text-white rounded-2xl font-black shadow-xl shadow-primary-600/20 hover:-translate-y-1 transition-all"
                   >
-                    Close Profile
+                    Done
                   </button>
                 </div>
               </div>
