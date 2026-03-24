@@ -74,7 +74,7 @@ export default function MainLayout() {
                     alt="Profile" 
                     className="w-full h-full object-cover transition-opacity duration-300" 
                     onLoad={(e) => (e.currentTarget.style.opacity = '1')}
-                    onError={(e) => {
+                    onError={() => {
                       console.error("Header image failed to load:", profileImage);
                       setProfileImage(null);
                     }} 
