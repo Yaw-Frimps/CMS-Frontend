@@ -19,9 +19,12 @@ export default function Sidebar() {
 
   return (
     <div className="w-72 bg-white dark:bg-zinc-900 border-r border-zinc-200/50 dark:border-zinc-800/50 flex flex-col z-40 transition-colors duration-500 relative">
-      <div className="h-20 flex items-center px-8 mt-4 mb-2">
-        <Link to="/" className="flex items-center space-x-3 group w-full">
-          <img src="/logo.png" alt="People Of Vision Logo" className="w-full h-16 object-contain group-hover:scale-105 transition-transform duration-300" />
+      <div className="h-24 flex items-center justify-center px-6 mt-4 mb-2">
+        <Link to="/" className="flex flex-col items-center justify-center space-y-2 group w-full text-center">
+          <img src="/logo.png" alt="People Of Vision Logo" className="w-auto h-12 object-contain group-hover:scale-105 transition-transform duration-300" />
+          <span className="text-sm font-bold font-headline text-zinc-800 dark:text-zinc-100 leading-tight">
+            People of Vision<br/><span className="text-primary-600 dark:text-primary-400">International</span>
+          </span>
         </Link>
       </div>
       

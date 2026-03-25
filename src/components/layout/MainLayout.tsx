@@ -56,8 +56,7 @@ export default function MainLayout() {
         <header className="h-16 glass z-10 relative flex items-center justify-between px-8 border-b border-zinc-200/50 dark:border-zinc-800/50">
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center gap-2 group transition-all">
-              <img src="/logo.png" alt="POV Logo" className="h-10 object-contain" />
-              <span className="hidden sm:inline font-headline font-bold text-zinc-800 dark:text-zinc-100">Int Manager</span>
+              <span className="font-headline font-bold text-xl text-zinc-800 dark:text-zinc-100 tracking-tight">POVI Management System</span>
             </Link>
           </div>
           

@@ -75,7 +75,8 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <Link to="/" className="flex items-center gap-3 group h-full py-2">
-              <img src="/logo.png" alt="People Of Vision Logo" className="h-16 md:h-20 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm" />
+              <img src="/logo.png" alt="People Of Vision Logo" className="h-10 md:h-12 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm" />
+              <span className="hidden md:inline text-xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent transition-colors duration-300">People Of Vision International</span>
             </Link>
             <div className="hidden md:flex space-x-8">
               <a href="#about" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">About Us</a>
@@ -125,19 +126,19 @@ export default function Landing() {
         </div>
 
         {/* Content */}
-        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white pointer-events-none">
           <motion.div
-            key={`content-${currentSlide}`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
+            className="pointer-events-auto"
           >
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 drop-shadow-lg">
-              <span className="block">{displayCarousel[currentSlide].title}</span>
+              <span className="block">Welcome to</span>
               <span className="block bg-gradient-to-r from-primary-400 to-secondary-300 bg-clip-text text-transparent mt-2">People Of Vision International</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-100 drop-shadow-md">
-              {displayCarousel[currentSlide].description}
+              A vibrant community of faith where everyone is loved and supported to discover their unique purpose.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Link to={isAuthenticated ? '/dashboard' : '/register'} className="px-8 py-4 bg-white text-gray-900 text-lg font-medium rounded-full shadow-xl hover:bg-gray-100 hover:-translate-y-1 transition-all flex items-center gap-2">

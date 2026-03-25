@@ -27,7 +27,8 @@ export default function MembersList() {
     try {
       setIsLoading(true);
       const res = await api.get('/members');
-      setMembers(res.data);
+      const filtered = res.data.filter((m: any) => m.role !== 'ADMIN');
+      setMembers(filtered);
     } catch (error) {
       console.error(error);
     } finally {

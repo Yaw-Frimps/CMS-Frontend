@@ -214,6 +214,18 @@ export default function Settings() {
     show: { opacity: 1, y: 0 }
   };
 
+  const formatDateForInput = (dateObj: any) => {
+    if (!dateObj) return '';
+    if (Array.isArray(dateObj)) {
+      const [y, m, d] = dateObj;
+      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+    if (typeof dateObj === 'string') {
+      return dateObj.split('T')[0];
+    }
+    return '';
+  };
+
   return (
     <div className="space-y-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -330,9 +342,9 @@ export default function Settings() {
                             <div className="space-y-2">
                               <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
                               <div className="relative">
-                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                                <input type="date" value={profileData.dateOfBirth} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
+                                <input type="date" value={formatDateForInput(profileData.dateOfBirth)} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold cursor-pointer"
                                 />
                               </div>
                             </div>
@@ -342,9 +354,9 @@ export default function Settings() {
                               <div className="space-y-2">
                                 <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Joined Date</label>
                                 <div className="relative">
-                                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                                  <input type="date" value={profileData.joinedDate ? profileData.joinedDate.split('T')[0] : ''} onChange={(e) => setProfileData({ ...profileData, joinedDate: e.target.value })}
-                                    className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
+                                  <input type="date" value={formatDateForInput(profileData.joinedDate)} onChange={(e) => setProfileData({ ...profileData, joinedDate: e.target.value })}
+                                    className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold cursor-pointer"
                                   />
                                 </div>
                               </div>
