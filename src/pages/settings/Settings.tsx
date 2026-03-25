@@ -131,10 +131,10 @@ export default function Settings() {
         const formData = new FormData();
         formData.append('profileImage', selectedFile);
         formData.append('dateOfBirth', payload.dateOfBirth);
-        // We'll update other fields separately or add to formData if the backend supports it.
-        // For now, let's do a two-step if needed, but the current backend uploadProfileImage
-        // only takes dateOfBirth. Let's update the standard update endpoint.
-        await api.post(`/members/${user.memberId}/profile-image`, formData, { headers: { 'Content-Type': undefined } });
+        const imgRes = await api.post(`/members/${user.memberId}/profile-image`, formData, { headers: { 'Content-Type': undefined } });
+        if (imgRes.data && imgRes.data.profileImageUrl) {
+          payload.profileImageUrl = imgRes.data.profileImageUrl;
+        }
       }
 
       const res = await api.put(`/members/${user.memberId}/profile`, payload);

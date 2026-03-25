@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../services/api';
-import { Calendar as CalendarIcon, MapPin, Clock, Users, Plus, X, Loader2, Trash2, ClipboardCheck } from 'lucide-react';
+import { api, getImageUrl } from '../../services/api';
+import { Calendar as CalendarIcon, MapPin, Clock, Users, Plus, X, Loader2, Trash2, ClipboardCheck, Edit2, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ImageUpload from '../../components/common/ImageUpload';
@@ -11,6 +11,8 @@ export default function EventsList() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+  const [viewingEvent, setViewingEvent] = useState<any | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -46,6 +48,7 @@ export default function EventsList() {
   }, []);
 
   const handleOpenAdd = () => {
+    setEditingEventId(null);
     setFormData({
       title: '',
       description: '',
@@ -53,6 +56,26 @@ export default function EventsList() {
       imageUrl: '',
       startTime: '',
       endTime: ''
+    });
+    setSelectedEventImage(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (event: any) => {
+    setEditingEventId(event.id);
+    const formatDate = (dateString: string) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+    
+    setFormData({
+      title: event.title,
+      description: event.description,
+      location: event.location,
+      imageUrl: event.imageUrl || '',
+      startTime: formatDate(event.startTime),
+      endTime: formatDate(event.endTime)
     });
     setSelectedEventImage(null);
     setIsModalOpen(true);
@@ -121,12 +144,21 @@ export default function EventsList() {
         finalImageUrl = uploadRes.data;
       }
 
-      await api.post('/events', {
-        ...formData,
-        imageUrl: finalImageUrl,
-        startTime: new Date(formData.startTime).toISOString(),
-        endTime: new Date(formData.endTime).toISOString()
-      });
+      if (editingEventId) {
+        await api.put(`/events/${editingEventId}`, {
+          ...formData,
+          imageUrl: finalImageUrl,
+          startTime: new Date(formData.startTime).toISOString(),
+          endTime: new Date(formData.endTime).toISOString()
+        });
+      } else {
+        await api.post('/events', {
+          ...formData,
+          imageUrl: finalImageUrl,
+          startTime: new Date(formData.startTime).toISOString(),
+          endTime: new Date(formData.endTime).toISOString()
+        });
+      }
       setIsModalOpen(false);
       fetchEvents();
     } catch (error) {
@@ -183,11 +215,12 @@ export default function EventsList() {
             <motion.div 
               variants={item}
               key={event.id} 
-              className="glass-card flex flex-col group overflow-hidden border border-white/40 dark:border-zinc-800/50"
+              onClick={() => setViewingEvent(event)}
+              className="glass-card flex flex-col group overflow-hidden border border-white/40 dark:border-zinc-800/50 cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative h-56 w-full bg-zinc-100 dark:bg-zinc-900">
                 {event.imageUrl ? (
-                  <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                  <img src={event.imageUrl.startsWith('http') || event.imageUrl.startsWith('data:') ? event.imageUrl : getImageUrl(event.imageUrl) || ''} alt={event.title} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800">
                     <CalendarIcon className="w-12 h-12 text-zinc-300 dark:text-zinc-700" />
@@ -236,15 +269,22 @@ export default function EventsList() {
                   </div>
                   {isAdmin && (
                     <div className="flex items-center gap-2">
-                       <button 
-                        onClick={() => handleOpenAttendance(event.id)}
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleOpenAttendance(event.id); }}
                         className="p-2.5 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm"
                         title="Mark Attendance"
                       >
                         <ClipboardCheck className="w-5 h-5" />
                       </button>
                       <button 
-                        onClick={() => handleDelete(event.id)}
+                        onClick={(e) => { e.stopPropagation(); handleEdit(event); }}
+                        className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-600 hover:text-white transition-all shadow-sm"
+                        title="Edit Event"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDelete(event.id); }}
                         className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-sm"
                         title="Delete Event"
                       >
@@ -280,11 +320,11 @@ export default function EventsList() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="glass p-8 rounded-[2.5rem] w-full max-w-xl shadow-2xl border border-white/20"
+              className="glass p-8 rounded-[2.5rem] w-full max-w-2xl shadow-2xl border border-white/20 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">Create Event</h2>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
+                <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">{editingEventId ? 'Edit Event' : 'Create Event'}</h2>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
                   <X className="w-6 h-6" />
                 </button>
               </div>
@@ -308,6 +348,7 @@ export default function EventsList() {
                     <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Event Image</label>
                     <ImageUpload 
                       onImageSelect={(file) => setSelectedEventImage(file)} 
+                      currentImageUrl={formData.imageUrl}
                       label=""
                       helpText="Recommended size: 1080x1080px. Max 5MB."
                     />
@@ -341,7 +382,7 @@ export default function EventsList() {
                     Cancel
                   </button>
                   <button disabled={isSubmitting} type="submit" className="px-8 py-3 bg-primary-600 text-white rounded-2xl font-black shadow-xl shadow-primary-600/20 hover:bg-primary-500 transition-all flex items-center">
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Event'}
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingEventId ? 'Save Changes' : 'Create Event')}
                   </button>
                 </div>
               </form>
@@ -404,6 +445,93 @@ export default function EventsList() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* View Event Details Modal */}
+      <AnimatePresence>
+        {viewingEvent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-zinc-950/40 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="glass rounded-[2.5rem] w-full max-w-2xl shadow-2xl border border-white/20 overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="relative h-64 w-full bg-zinc-100 dark:bg-zinc-900 flex-shrink-0">
+                {viewingEvent.imageUrl ? (
+                  <img src={viewingEvent.imageUrl.startsWith('http') || viewingEvent.imageUrl.startsWith('data:') ? viewingEvent.imageUrl : getImageUrl(viewingEvent.imageUrl) || ''} alt={viewingEvent.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <CalendarIcon className="w-16 h-16 text-zinc-300 dark:text-zinc-700" />
+                  </div>
+                )}
+                <div className="absolute top-4 right-4 flex gap-2">
+                  {isAdmin && (
+                    <button 
+                      onClick={() => { setViewingEvent(null); handleEdit(viewingEvent); }}
+                      className="p-2.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-orange-600 backdrop-blur-md transition-all shadow-sm"
+                      title="Edit Event"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setViewingEvent(null)}
+                    className="p-2.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-zinc-900 backdrop-blur-md transition-all shadow-sm"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-8 overflow-y-auto">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full ${
+                    new Date(viewingEvent.startTime) > new Date() 
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                    : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                  }`}>
+                    {new Date(viewingEvent.startTime) > new Date() ? 'Upcoming' : 'Completed'}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight mb-6">{viewingEvent.title}</h2>
+                
+                <div className="space-y-6 mb-8">
+                  <div className="flex items-center text-zinc-600 dark:text-zinc-300 p-4 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl border border-zinc-100 dark:border-zinc-800/50">
+                    <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4 flex-shrink-0">
+                      <Clock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-1">Date & Time</p>
+                      <p className="font-bold">
+                        {new Date(viewingEvent.startTime).toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}<br/>
+                        {new Date(viewingEvent.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
+                        {new Date(viewingEvent.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-zinc-600 dark:text-zinc-300 p-4 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl border border-zinc-100 dark:border-zinc-800/50">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mr-4 flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-1">Location</p>
+                      <p className="font-bold">{viewingEvent.location}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-black text-zinc-500 uppercase tracking-widest mb-4 flex items-center">
+                    <Info className="w-4 h-4 mr-2" /> Description
+                  </h3>
+                  <p className="text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap font-medium">
+                    {viewingEvent.description}
+                  </p>
+                </div>
+              </div>
             </motion.div>
           </div>
         )}
