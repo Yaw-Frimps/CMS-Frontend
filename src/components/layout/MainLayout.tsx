@@ -45,7 +45,7 @@ export default function MainLayout() {
   }, [user?.memberId, user?.profileImageUrl]);
 
   return (
-    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden font-sans transition-colors duration-500">
+    <div className="flex h-screen bg-neutral-100 dark:bg-zinc-950 overflow-hidden font-sans transition-colors duration-500">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* Decorative background blobs */}
@@ -63,7 +63,7 @@ export default function MainLayout() {
           <div className="flex items-center space-x-6">
             <button className="p-2 text-zinc-500 hover:text-primary-600 dark:text-zinc-400 dark:hover:text-primary-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all relative">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-accent-500 rounded-full border-2 border-white dark:border-zinc-900"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900"></span>
             </button>
             
             <button 

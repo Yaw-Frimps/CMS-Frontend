@@ -3,6 +3,7 @@ import { api } from '../../services/api';
 import { Calendar as CalendarIcon, MapPin, Clock, Users, Plus, X, Loader2, Trash2, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImageUpload from '../../components/common/ImageUpload';
 
 export default function EventsList() {
   const { isAdmin } = useAuth();
@@ -19,6 +20,7 @@ export default function EventsList() {
     startTime: '',
     endTime: ''
   });
+  const [selectedEventImage, setSelectedEventImage] = useState<File | null>(null);
 
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
@@ -52,6 +54,7 @@ export default function EventsList() {
       startTime: '',
       endTime: ''
     });
+    setSelectedEventImage(null);
     setIsModalOpen(true);
   };
 
@@ -107,8 +110,20 @@ export default function EventsList() {
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      let finalImageUrl = formData.imageUrl;
+      
+      if (selectedEventImage) {
+        const imageFormData = new FormData();
+        imageFormData.append('file', selectedEventImage);
+        const uploadRes = await api.post('/events/upload-image', imageFormData, {
+          headers: { 'Content-Type': undefined }
+        });
+        finalImageUrl = uploadRes.data;
+      }
+
       await api.post('/events', {
         ...formData,
+        imageUrl: finalImageUrl,
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString()
       });
@@ -290,9 +305,11 @@ export default function EventsList() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Image URL</label>
-                    <input type="url" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} placeholder="https://..."
-                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Event Image</label>
+                    <ImageUpload 
+                      onImageSelect={(file) => setSelectedEventImage(file)} 
+                      label=""
+                      helpText="Recommended size: 1080x1080px. Max 5MB."
                     />
                   </div>
                 </div>

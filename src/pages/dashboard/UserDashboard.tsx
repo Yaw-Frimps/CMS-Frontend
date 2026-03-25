@@ -187,7 +187,7 @@ export default function UserDashboard() {
 
         {/* Attendance */}
         <motion.div variants={item} className="glass-card p-8 flex flex-col items-start border border-white/40 dark:border-zinc-800/50">
-          <div className="w-12 h-12 rounded-2xl bg-accent-500/10 text-accent-600 flex items-center justify-center mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-tertiary-500/10 text-tertiary-600 flex items-center justify-center mb-6">
             <CheckCircle className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-black text-zinc-400 uppercase tracking-widest mb-1">Attendance</h3>

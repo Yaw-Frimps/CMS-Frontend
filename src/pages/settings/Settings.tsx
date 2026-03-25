@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api, getImageUrl } from '../../services/api';
-import { User, Lock, Shield, Mail, Loader2, Eye, EyeOff, Camera, Calendar, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import { User, Lock, Shield, Mail, Loader2, Eye, EyeOff, Camera, Calendar, CheckCircle2, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Settings Page ──────────────────────────────────────────────────────────────
@@ -11,6 +11,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   
   // Profile State
   const [profileData, setProfileData] = useState({ 
@@ -39,7 +40,6 @@ export default function Settings() {
     confirmPassword: '',
   });
   const [passSaving, setPassSaving] = useState(false);
-  const [passError, setPassError] = useState('');
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -120,6 +120,7 @@ export default function Settings() {
     try {
       setSaving(true);
       setSuccessMsg('');
+      setErrorMsg('');
       
       const payload = {
         ...profileData,
@@ -167,12 +168,13 @@ export default function Settings() {
       setTimeout(() => setSuccessMsg(''), 3000);
       
       // Update global user state if needed
-      if (profileData.profileImageUrl) {
-        updateUser({ profileImageUrl: profileData.profileImageUrl });
-        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profileImageUrl: profileData.profileImageUrl } }));
+      if (data.profileImageUrl) {
+        updateUser({ profileImageUrl: data.profileImageUrl });
+        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profileImageUrl: data.profileImageUrl } }));
       }
     } catch (error: any) {
-      alert(`Error: ${error.message}`);
+      setErrorMsg(error.response?.data?.message || error.message || 'Failed to update profile.');
+      setTimeout(() => setErrorMsg(''), 5000);
     } finally {
       setSaving(false);
     }
@@ -181,12 +183,12 @@ export default function Settings() {
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPassError('New passwords do not match.');
+      setErrorMsg('New passwords do not match.');
       return;
     }
     try {
       setPassSaving(true);
-      setPassError('');
+      setErrorMsg('');
       await api.put(`/users/${user?.id}/password`, {
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
@@ -195,7 +197,8 @@ export default function Settings() {
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err: any) {
-      setPassError(err.response?.data?.message || 'Update failed. Check current password.');
+      setErrorMsg(err.response?.data?.message || 'Update failed. Check current password.');
+      setTimeout(() => setErrorMsg(''), 5000);
     } finally {
       setPassSaving(false);
     }
@@ -234,16 +237,19 @@ export default function Settings() {
           >
             Personal Details
           </button>
-          <button 
-            onClick={() => setActiveTab('security')}
-            className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
-              activeTab === 'security' 
-                ? 'bg-white dark:bg-zinc-800 text-primary-600 shadow-sm' 
-                : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'
-            }`}
-          >
-            Change Password
-          </button>
+          
+          {user?.role !== 'ADMIN' && (
+            <button 
+              onClick={() => setActiveTab('security')}
+              className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === 'security' 
+                  ? 'bg-white dark:bg-zinc-800 text-primary-600 shadow-sm' 
+                  : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'
+              }`}
+            >
+              Change Password
+            </button>
+          )}
         </div>
       </div>
 
@@ -275,6 +281,11 @@ export default function Settings() {
                   {successMsg && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-2xl font-bold flex items-center gap-3">
                       <CheckCircle2 className="w-5 h-5" /> {successMsg}
+                    </motion.div>
+                  )}
+                  {errorMsg && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl font-bold flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5" /> {errorMsg}
                     </motion.div>
                   )}
 
@@ -327,11 +338,22 @@ export default function Settings() {
                             </div>
                           )}
                           {user?.role !== 'ADMIN' && (
-                            <div className="col-span-full space-y-2">
-                              <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Home Address</label>
-                              <textarea rows={2} value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
-                                className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none"
-                              />
+                            <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-8">
+                              <div className="space-y-2">
+                                <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Joined Date</label>
+                                <div className="relative">
+                                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                                  <input type="date" value={profileData.joinedDate ? profileData.joinedDate.split('T')[0] : ''} onChange={(e) => setProfileData({ ...profileData, joinedDate: e.target.value })}
+                                    className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                                  />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Home Address</label>
+                                <textarea rows={2} value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
+                                  className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none"
+                                />
+                              </div>
                             </div>
                           )}
                         </div>
@@ -481,9 +503,9 @@ export default function Settings() {
                       <CheckCircle2 className="w-5 h-5" /> {successMsg}
                     </motion.div>
                   )}
-                  {passError && (
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-2xl text-sm font-bold border border-red-200 dark:border-red-800">
-                      {passError}
+                  {errorMsg && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl font-bold flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5" /> {errorMsg}
                     </motion.div>
                   )}
 
