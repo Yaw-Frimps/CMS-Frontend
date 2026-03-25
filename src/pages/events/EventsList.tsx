@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ImageUpload from '../../components/common/ImageUpload';
 
 export default function EventsList() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -126,6 +126,20 @@ export default function EventsList() {
       alert('Failed to record attendance.');
     } finally {
       setAttendanceLoading(false);
+    }
+  };
+
+  const handleToggleRegistration = async (eventId: number, isRegistered: boolean) => {
+    if (!user?.memberId) return;
+    try {
+      if (isRegistered) {
+        await api.delete(`/events/${eventId}/register/${user.memberId}`);
+      } else {
+        await api.post(`/events/${eventId}/register/${user.memberId}`);
+      }
+      fetchEvents();
+    } catch (error) {
+      console.error("Failed to toggle registration", error);
     }
   };
 
@@ -264,31 +278,46 @@ export default function EventsList() {
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-                  <div className="flex items-center text-xs font-black text-zinc-400 uppercase tracking-widest">
-                    <Users className="w-3.5 h-3.5 mr-2" /> 0 Registered
-                  </div>
-                  {isAdmin && (
-                    <div className="flex items-center gap-2">
+                  {isAdmin ? (
+                    <>
+                      <div className="flex items-center text-xs font-black text-zinc-400 uppercase tracking-widest">
+                        <Users className="w-3.5 h-3.5 mr-2" /> {event.registeredCount || 0} Registered
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleOpenAttendance(event.id); }}
+                          className="p-2.5 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm"
+                          title="Mark Attendance"
+                        >
+                          <ClipboardCheck className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleEdit(event); }}
+                          className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-600 hover:text-white transition-all shadow-sm"
+                          title="Edit Event"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleDelete(event.id); }}
+                          className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                          title="Delete Event"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full">
                       <button 
-                        onClick={(e) => { e.stopPropagation(); handleOpenAttendance(event.id); }}
-                        className="p-2.5 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm"
-                        title="Mark Attendance"
+                        onClick={(e) => { e.stopPropagation(); handleToggleRegistration(event.id, event.registeredMemberIds?.includes(user?.memberId)); }}
+                        className={`w-full py-3.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${
+                          event.registeredMemberIds?.includes(user?.memberId) 
+                            ? 'bg-zinc-100 dark:bg-zinc-800/50 text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-red-50 hover:text-red-500 hover:border-red-200 dark:hover:bg-red-900/10 dark:hover:border-red-900/30 dark:hover:text-red-400' 
+                            : 'bg-primary-600 text-white hover:bg-primary-500 shadow-xl shadow-primary-500/20 hover:shadow-primary-500/30 hover:-translate-y-0.5'
+                        }`}
                       >
-                        <ClipboardCheck className="w-5 h-5" />
-                      </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleEdit(event); }}
-                        className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-600 hover:text-white transition-all shadow-sm"
-                        title="Edit Event"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDelete(event.id); }}
-                        className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                        title="Delete Event"
-                      >
-                        <Trash2 className="w-5 h-5" />
+                        {event.registeredMemberIds?.includes(user?.memberId) ? 'Withdraw RSV' : 'Register Now'}
                       </button>
                     </div>
                   )}

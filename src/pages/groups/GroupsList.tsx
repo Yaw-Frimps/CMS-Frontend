@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../services/api';
-import { Search, Plus, Edit2, Trash2, Users, X, Loader2, Layers, Clock, LogIn, LogOut } from 'lucide-react';
+import { api, getImageUrl } from '../../services/api';
+import { Search, Plus, Edit2, Trash2, Users, X, Loader2, Layers, Clock, LogIn, LogOut, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import ImageUpload from '../../components/common/ImageUpload';
 
 export default function GroupsList() {
   const { isAdmin, user } = useAuth();
@@ -15,8 +16,10 @@ export default function GroupsList() {
     name: '',
     description: '',
     meetingSchedule: '',
-    category: 'General'
+    category: 'General',
+    imageUrl: ''
   });
+  const [selectedGroupImage, setSelectedGroupImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchGroups = async () => {
@@ -41,7 +44,8 @@ export default function GroupsList() {
 
   const handleOpenAdd = () => {
     setEditingGroup(null);
-    setFormData({ name: '', description: '', meetingSchedule: '', category: 'General' });
+    setFormData({ name: '', description: '', meetingSchedule: '', category: 'General', imageUrl: '' });
+    setSelectedGroupImage(null);
     setIsModalOpen(true);
   };
 
@@ -51,8 +55,10 @@ export default function GroupsList() {
       name: group.name || '',
       description: group.description || '',
       meetingSchedule: group.meetingSchedule || '',
-      category: group.category || 'General'
+      category: group.category || 'General',
+      imageUrl: group.imageUrl || ''
     });
+    setSelectedGroupImage(null);
     setIsModalOpen(true);
   };
 
@@ -85,10 +91,25 @@ export default function GroupsList() {
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      let finalImageUrl = formData.imageUrl;
+      
+      if (selectedGroupImage) {
+        const imageFormData = new FormData();
+        imageFormData.append('file', selectedGroupImage);
+        const uploadRes = await api.post('/groups/upload-image', imageFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        finalImageUrl = uploadRes.data;
+      }
+
+      const payload = { ...formData, imageUrl: finalImageUrl };
+
       if (editingGroup) {
-        await api.put(`/groups/${editingGroup.id}`, formData);
+        await api.put(`/groups/${editingGroup.id}`, payload);
       } else {
-        await api.post('/groups', formData);
+        await api.post('/groups', payload);
       }
       setIsModalOpen(false);
       fetchGroups();
@@ -158,8 +179,28 @@ export default function GroupsList() {
               layout
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="group bg-white/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[2rem] p-8 hover:shadow-2xl hover:shadow-primary-500/10 transition-all relative overflow-hidden flex flex-col"
+              className="group bg-white/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[2rem] hover:shadow-2xl hover:shadow-primary-500/10 transition-all relative overflow-hidden flex flex-col"
             >
+              {group.imageUrl ? (
+                <div className="h-40 w-full relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent z-10" />
+                  <img src={getImageUrl(group.imageUrl)!} alt={group.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute bottom-4 left-6 z-20">
+                    <span className="px-3 py-1 bg-primary-500/80 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/20">
+                      {group.category}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-32 w-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 relative overflow-hidden flex items-center justify-center">
+                  <Layers className="w-12 h-12 text-zinc-300 dark:text-zinc-700 absolute opacity-50 -right-4 -bottom-4 rotate-12 scale-150" />
+                  <span className="px-3 py-1 bg-zinc-400/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400 border border-black/5 dark:border-white/5 absolute bottom-4 left-6">
+                    {group.category}
+                  </span>
+                </div>
+              )}
+
+              <div className="p-8 flex-1 flex flex-col">
               {isAdmin && (
                 <div className="absolute top-0 right-0 p-6 flex gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-500">
                   <button 
@@ -177,12 +218,13 @@ export default function GroupsList() {
                 </div>
               )}
 
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/20">
-                  <Layers className="w-7 h-7" />
-                </div>
+              <div className="flex items-center gap-4 mb-4">
+                {!group.imageUrl && (
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/20 shrink-0">
+                    <Layers className="w-6 h-6" />
+                  </div>
+                )}
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-600 mb-1 block">{group.category}</span>
                   <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-50 leading-tight">{group.name}</h3>
                 </div>
               </div>
@@ -231,6 +273,7 @@ export default function GroupsList() {
                   </div>
                 )}
               </div>
+              </div>
             </motion.div>
           )) : (
             <div className="col-span-full py-20 text-center">
@@ -250,7 +293,7 @@ export default function GroupsList() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="glass p-10 rounded-[2.5rem] w-full max-w-xl shadow-2xl border border-white/20"
+              className="glass p-10 rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/20"
             >
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">
@@ -262,6 +305,16 @@ export default function GroupsList() {
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2" /> Group Cover Image
+                  </label>
+                  <ImageUpload 
+                    onImageSelect={(file) => setSelectedGroupImage(file)} 
+                    currentImageUrl={formData.imageUrl}
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Group Name</label>
                   <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}

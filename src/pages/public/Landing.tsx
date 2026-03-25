@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { api, getImageUrl } from '../../services/api';
-import { Heart, Users, MapPin, Mail, Phone, ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Heart, Users, MapPin, Mail, Phone, ArrowRight, ChevronLeft, ChevronRight, Loader2, Calendar, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import churchInterior from '../../assets/church_interior_community.png';
 import smallGroup from '../../assets/small_group_community.png';
@@ -20,17 +20,25 @@ export default function Landing() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroImages, setHeroImages] = useState<GalleryImage[]>([]);
   const [landingGallery, setLandingGallery] = useState<GalleryImage[]>([]);
+  const [publicEvents, setPublicEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [heroRes, galleryRes] = await Promise.all([
+        const [heroRes, galleryRes, eventsRes] = await Promise.all([
           api.get('/gallery/hero'),
-          api.get('/gallery/landing')
+          api.get('/gallery/landing'),
+          api.get('/events')
         ]);
         setHeroImages(heroRes.data);
         setLandingGallery(galleryRes.data);
+        
+        const upcoming = eventsRes.data
+            .filter((e: any) => new Date(e.startTime) >= new Date())
+            .sort((a: any, b: any) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+            .slice(0, 3);
+        setPublicEvents(upcoming);
       } catch (err) {
         console.error('Failed to fetch landing data', err);
       } finally {
@@ -66,14 +74,12 @@ export default function Landing() {
       <nav className="fixed w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-13 h-13 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30 group-hover:scale-110 transition-transform">
-                POV
-              </div>
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent transition-colors duration-300">People Of Vision</span>
+            <Link to="/" className="flex items-center gap-3 group h-full py-2">
+              <img src="/logo.png" alt="People Of Vision Logo" className="h-16 md:h-20 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm" />
             </Link>
             <div className="hidden md:flex space-x-8">
               <a href="#about" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">About Us</a>
+              <a href="#events" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Events</a>
               <a href="#gallery" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Gallery</a>
               <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">Contact</a>
             </div>
@@ -210,8 +216,80 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Events Section */}
+      <section id="events" className="py-24 bg-white dark:bg-gray-950 transition-colors duration-300 relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-800 to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-16">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl transition-colors duration-300">Upcoming Events</h2>
+              <p className="mt-4 text-xl text-gray-500 dark:text-gray-400 transition-colors duration-300">Join us in fellowship and community building.</p>
+            </div>
+          </div>
+
+          {loading ? (
+             <div className="flex justify-center py-12">
+               <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+             </div>
+          ) : publicEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {publicEvents.map((event) => (
+                <motion.div
+                  key={event.id}
+                  whileHover={{ y: -8 }}
+                  className="bg-gray-50 dark:bg-gray-900 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800"
+                >
+                  <div className="relative h-56 w-full bg-gray-200 dark:bg-gray-800">
+                    {event.imageUrl ? (
+                      <img src={getImageUrl(event.imageUrl) || ''} alt={event.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Calendar className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-4 py-2 rounded-2xl text-center shadow-lg border border-gray-100 dark:border-gray-700">
+                      <p className="text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest leading-none mb-1">
+                        {new Date(event.startTime).toLocaleString('default', { month: 'short' })}
+                      </p>
+                      <p className="text-2xl font-black text-gray-900 dark:text-white leading-none">
+                        {new Date(event.startTime).getDate()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-8">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-1">{event.title}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 line-clamp-2">{event.description}</p>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <div className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center mr-3">
+                          <Clock className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                        </div>
+                        {new Date(event.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                      <div className="flex items-center text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <div className="w-8 h-8 rounded-xl bg-secondary-50 dark:bg-secondary-900/20 flex items-center justify-center mr-3">
+                          <MapPin className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                        </div>
+                        {event.location}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+             <div className="text-center py-20 bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800">
+               <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+               <h3 className="text-lg font-medium text-gray-900 dark:text-white">No Upcoming Events</h3>
+               <p className="mt-2 text-gray-500">Check back later for new gatherings and services.</p>
+             </div>
+          )}
+        </div>
+      </section>
+
       {/* Gallery Section */}
-      <section id="gallery" className="py-24 bg-white dark:bg-gray-950 transition-colors duration-300">
+      <section id="gallery" className="py-24 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>

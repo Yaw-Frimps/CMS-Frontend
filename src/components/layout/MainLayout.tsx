@@ -49,14 +49,15 @@ export default function MainLayout() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* Decorative background blobs */}
-        <div className="absolute top-0 right-0 -m-32 w-96 h-96 bg-primary-200/20 dark:bg-primary-900/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 animate-blob pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -m-32 w-96 h-96 bg-secondary-200/20 dark:bg-secondary-900/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 animate-blob animation-delay-2000 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 -m-32 w-96 h-96 bg-primary-200/20 dark:bg-primary-900/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 animate-blob pointer-events-none -z-10"></div>
+        <div className="absolute bottom-0 left-0 -m-32 w-96 h-96 bg-secondary-200/20 dark:bg-secondary-900/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-50 animate-blob animation-delay-2000 pointer-events-none -z-10"></div>
 
         {/* Top Navbar */}
-        <header className="h-16 glass z-30 flex items-center justify-between px-8 border-b border-zinc-200/50 dark:border-zinc-800/50">
+        <header className="h-16 glass z-10 relative flex items-center justify-between px-8 border-b border-zinc-200/50 dark:border-zinc-800/50">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="text-xl font-bold text-zinc-800 dark:text-zinc-100 group transition-all">
-              <span className="text-gradient">POV</span> <span className="hidden sm:inline">Int Manager</span>
+            <Link to="/" className="flex items-center gap-2 group transition-all">
+              <img src="/logo.png" alt="POV Logo" className="h-10 object-contain" />
+              <span className="hidden sm:inline font-headline font-bold text-zinc-800 dark:text-zinc-100">Int Manager</span>
             </Link>
           </div>
           
@@ -100,7 +101,7 @@ export default function MainLayout() {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto relative z-10">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <div className="container mx-auto max-w-7xl p-6 lg:p-10 min-h-full">
             <AnimatePresence mode="wait">
               <motion.div

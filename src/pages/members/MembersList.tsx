@@ -294,15 +294,15 @@ export default function MembersList() {
                initial={{ opacity: 0, scale: 0.9, y: 30 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-               className="glass p-0 rounded-[3rem] w-full max-w-4xl shadow-2xl border border-white/20 overflow-hidden"
+               className="glass p-0 rounded-[2.5rem] w-full max-w-3xl shadow-2xl border border-white/20 overflow-hidden"
             >
-              <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-800 p-12 text-white relative">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none" />
-                <button onClick={() => setIsDetailModalOpen(false)} className="absolute top-8 right-8 p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition-all hover:rotate-90 z-10">
-                  <X className="w-6 h-6" />
+              <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-indigo-800 pt-4 px-8 pb-8 text-white relative">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-10 -mt-10 blur-3xl pointer-events-none" />
+                <button type="button" onClick={(e) => { e.stopPropagation(); setIsDetailModalOpen(false); }} className="absolute top-4 right-4 p-2 rounded-2xl bg-white/10 hover:bg-white/20 transition-all hover:rotate-90 z-50 cursor-pointer shadow-xl">
+                  <X className="w-5 h-5 text-white" />
                 </button>
-                <div className="flex flex-col md:flex-row items-center md:items-end gap-8 relative z-10">
-                  <div className="w-40 h-40 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border-4 border-white/20 overflow-hidden shadow-2xl shrink-0 group">
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-6 relative z-10">
+                  <div className="w-28 h-28 rounded-3xl bg-white/10 backdrop-blur-xl border-4 border-white/20 overflow-hidden shadow-2xl shrink-0 group">
                     {selectedMember.profileImageUrl ? (
                       <img 
                         src={getImageUrl(selectedMember.profileImageUrl) || ''} 
@@ -324,61 +324,61 @@ export default function MembersList() {
                         </span>
                       )}
                     </div>
-                    <h2 className="text-5xl font-black tracking-tight leading-none mb-4">{selectedMember.firstName} {selectedMember.lastName}</h2>
-                    <p className="text-white/60 font-medium text-lg max-w-lg">{selectedMember.profession || 'Faithful Member of the Congregation'}</p>
+                    <h2 className="text-3xl font-black tracking-tight leading-none mb-2">{selectedMember.firstName} {selectedMember.lastName}</h2>
+                    <p className="text-white/60 font-medium text-sm max-w-lg">{selectedMember.profession || 'Faithful Member of the Congregation'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-10 space-y-12 bg-white dark:bg-zinc-950 max-h-[65vh] overflow-y-auto custom-scrollbar">
+              <div className="p-6 space-y-6 bg-white dark:bg-zinc-950">
                 {/* Information Sections */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                  <div className="lg:col-span-2 space-y-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 space-y-6">
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
                         <UserIcon className="w-3.5 h-3.5 mr-2 text-primary-500" /> Member Identity
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0"><MapPin className="w-5 h-5" /></div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0"><MapPin className="w-4 h-4" /></div>
                           <div className="min-w-0">
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Address</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[11px] truncate">{selectedMember.address || 'Not Provided'}</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px] truncate">{selectedMember.address || 'Not Provided'}</p>
                           </div>
                         </div>
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0"><ArrowUpDown className="w-5 h-5" /></div>
+                        <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0"><ArrowUpDown className="w-4 h-4" /></div>
                           <div>
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Gender</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-xs">{selectedMember.gender || 'Unknown'}</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px]">{selectedMember.gender || 'Unknown'}</p>
                           </div>
                         </div>
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0"><Briefcase className="w-5 h-5" /></div>
+                        <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0"><Briefcase className="w-4 h-4" /></div>
                           <div>
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Profession</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate">{selectedMember.profession || 'N/A'}</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px] truncate">{selectedMember.profession || 'N/A'}</p>
                           </div>
                         </div>
                       </div>
                     </section>
 
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
                         <Layers className="w-3.5 h-3.5 mr-2 text-primary-500" /> Spiritual Assignment
                       </h4>
                       <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-indigo-600 rounded-[2rem] opacity-20 blur-lg group-hover:opacity-30 transition-opacity" />
-                        <div className="relative p-8 bg-zinc-900 rounded-[2rem] text-white overflow-hidden">
-                          <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <Layers className="w-32 h-32 rotate-12" />
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-indigo-600 rounded-3xl opacity-20 blur-lg group-hover:opacity-30 transition-opacity" />
+                        <div className="relative p-6 bg-zinc-900 rounded-3xl text-white overflow-hidden">
+                          <div className="absolute top-0 right-0 p-6 opacity-5">
+                            <Layers className="w-24 h-24 rotate-12" />
                           </div>
-                          <div className="flex justify-between items-start mb-6">
+                          <div className="flex justify-between items-start mb-4">
                             <div>
                               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">System Authority</p>
-                              <p className="text-3xl font-black tracking-tighter uppercase">{selectedMember.membershipStatus || 'MEMBER'}</p>
+                              <p className="text-xl font-black tracking-tighter uppercase">{selectedMember.membershipStatus || 'MEMBER'}</p>
                             </div>
-                            <div className="px-4 py-2 bg-white/10 rounded-xl backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest">
+                            <div className="px-3 py-1.5 bg-white/10 rounded-lg backdrop-blur-md border border-white/10 text-[9px] font-black uppercase tracking-widest">
                               {selectedMember.userId ? 'Sync Active' : 'Offline Mode'}
                             </div>
                           </div>
@@ -394,41 +394,41 @@ export default function MembersList() {
                     </section>
                   </div>
 
-                  <div className="space-y-12">
+                  <div className="space-y-6">
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
                         <Phone className="w-3.5 h-3.5 mr-2 text-primary-500" /> Outreach & Care
                       </h4>
-                      <div className="space-y-4">
-                        <div className="group/item flex items-center p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-primary-500/30 transition-all">
-                          <Mail className="w-5 h-5 mr-4 text-primary-500 group-hover/item:scale-110 transition-transform" />
+                      <div className="space-y-3">
+                        <div className="group/item flex items-center p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-primary-500/30 transition-all">
+                          <Mail className="w-4 h-4 mr-3 text-primary-500 group-hover/item:scale-110 transition-transform" />
                           <div className="min-w-0">
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Email</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate">{selectedMember.email || 'No email'}</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px] truncate">{selectedMember.email || 'No email'}</p>
                           </div>
                         </div>
-                        <div className="group/item flex items-center p-5 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-primary-500/30 transition-all">
-                          <Phone className="w-5 h-5 mr-4 text-emerald-500 group-hover/item:scale-110 transition-transform" />
+                        <div className="group/item flex items-center p-4 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:border-primary-500/30 transition-all">
+                          <Phone className="w-4 h-4 mr-3 text-emerald-500 group-hover/item:scale-110 transition-transform" />
                           <div>
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Phone</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm tracking-tight">{selectedMember.phone || 'No phone'}</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px] tracking-tight">{selectedMember.phone || 'No phone'}</p>
                           </div>
                         </div>
-                        <div className="flex items-center p-5 bg-red-500/5 dark:bg-red-500/10 border border-red-500/10 dark:border-red-500/20 rounded-2xl">
-                          <ShieldAlert className="w-5 h-5 mr-4 text-red-500" />
+                        <div className="flex items-center p-4 bg-red-500/5 dark:bg-red-500/10 border border-red-500/10 dark:border-red-500/20 rounded-2xl">
+                          <ShieldAlert className="w-4 h-4 mr-3 text-red-500" />
                           <div>
                             <p className="text-[9px] font-black text-red-400 uppercase tracking-widest leading-none mb-1">Emergency</p>
-                            <p className="font-bold text-red-700 dark:text-red-400 text-xs truncate">{selectedMember.emergencyContact || 'Not Set'}</p>
+                            <p className="font-bold text-red-700 dark:text-red-400 text-[10px] truncate">{selectedMember.emergencyContact || 'Not Set'}</p>
                           </div>
                         </div>
                       </div>
                     </section>
 
                     <section>
-                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 flex items-center">
+                      <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4 flex items-center">
                         <Heart className="w-3.5 h-3.5 mr-2 text-primary-500" /> Household
                       </h4>
-                      <div className="p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 space-y-6">
+                      <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl border border-zinc-100 dark:border-zinc-800 space-y-4">
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Status</p>
@@ -440,13 +440,13 @@ export default function MembersList() {
                         </div>
                         
                         {selectedMember.maritalStatus === 'Married' && (
-                          <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                          <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800">
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Spouse</p>
-                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-sm tracking-tight">{selectedMember.spouseName || '---'}</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px] tracking-tight">{selectedMember.spouseName || '---'}</p>
                           </div>
                         )}
 
-                        <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                        <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800">
                           <div className="flex items-center justify-between mb-4">
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Children</p>
                             <div className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded text-[8px] font-black">
@@ -479,14 +479,14 @@ export default function MembersList() {
                   </div>
                 </div>
 
-                <div className="pt-10 border-t border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-6">
-                   <div className="flex items-center gap-4 text-zinc-400">
-                      <Calendar className="w-5 h-5" />
-                      <p className="text-xs font-bold leading-relaxed">Member since {selectedMember.joinedDate ? new Date(selectedMember.joinedDate).toLocaleDateString() : 'the Beginning'}</p>
+                <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                   <div className="flex items-center gap-3 text-zinc-400">
+                      <Calendar className="w-4 h-4" />
+                      <p className="text-[10px] font-bold leading-relaxed">Member since {selectedMember.joinedDate ? new Date(selectedMember.joinedDate).toLocaleDateString() : 'the Beginning'}</p>
                    </div>
                    <button 
                     onClick={() => setIsDetailModalOpen(false)}
-                    className="w-full md:w-auto px-12 py-4 bg-primary-600 text-white rounded-2xl font-black shadow-xl shadow-primary-600/20 hover:-translate-y-1 transition-all"
+                    className="w-full md:w-auto px-8 py-3 bg-primary-600 text-white rounded-xl font-black shadow-xl shadow-primary-600/20 hover:-translate-y-1 transition-all"
                   >
                     Done
                   </button>
