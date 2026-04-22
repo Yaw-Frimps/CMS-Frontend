@@ -212,23 +212,32 @@ export default function GroupsList() {
                 </div>
               )}
 
-              <div className="p-8 flex-1 flex flex-col">
               {isAdmin && (
-                <div className="absolute top-0 right-0 p-6 flex gap-2 transition-transform duration-500">
+                <div className="absolute top-4 right-4 flex gap-2 z-30 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                   <button 
-                    onClick={() => handleOpenEdit(group)}
-                    className="p-3 bg-white dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenEdit(group);
+                    }}
+                    className="p-2.5 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-primary-600 hover:text-white transition-all shadow-lg border border-white/20"
+                    title="Edit Group"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={() => handleDelete(group.id)}
-                    className="p-3 bg-white dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(group.id);
+                    }}
+                    className="p-2.5 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-red-600 hover:text-white transition-all shadow-lg border border-white/20"
+                    title="Delete Group"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               )}
+
+              <div className="p-8 flex-1 flex flex-col">
 
               <div className="flex items-center gap-4 mb-4">
                 {!group.imageUrl && (

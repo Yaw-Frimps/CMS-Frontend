@@ -7,6 +7,7 @@ interface LoginData {
   role: string;
   memberId: number;
   profileImageUrl?: string;
+  profileComplete?: boolean;
 }
 
 interface User {
@@ -15,6 +16,7 @@ interface User {
   role: string;
   memberId: number | null;
   profileImageUrl: string | null;
+  profileComplete: boolean;
 }
 
 interface AuthContextType {
@@ -55,9 +57,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (data: { token: string; id: number; email: string; role: string; memberId: number; profileImageUrl?: string }) => {
+  const login = (data: { token: string; id: number; email: string; role: string; memberId: number; profileImageUrl?: string; profileComplete?: boolean }) => {
     setToken(data.token);
-    const userData = { id: data.id, email: data.email, role: data.role, memberId: data.memberId, profileImageUrl: data.profileImageUrl || null };
+    const userData = { id: data.id, email: data.email, role: data.role, memberId: data.memberId, profileImageUrl: data.profileImageUrl || null, profileComplete: data.profileComplete ?? true };
     setUser(userData);
     
     localStorage.setItem('token', data.token);

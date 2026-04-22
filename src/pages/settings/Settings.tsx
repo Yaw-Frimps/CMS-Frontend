@@ -5,7 +5,6 @@ import { User, Lock, Shield, Mail, Loader2, Eye, EyeOff, Camera, Calendar, Check
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-// ── Settings Page ──────────────────────────────────────────────────────────────
 export default function Settings() {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -168,6 +167,16 @@ export default function Settings() {
       setSuccessMsg('Profile updated successfully!');
       setTimeout(() => setSuccessMsg(''), 3000);
       
+      // Mark profile as complete on first save
+      if (!user?.profileComplete && user?.id) {
+        try {
+          await api.post(`/users/${user.id}/complete-profile`);
+          updateUser({ profileComplete: true });
+        } catch (e) {
+          console.error('Could not mark profile complete', e);
+        }
+      }
+
       // Update global user state if needed
       if (data.profileImageUrl) {
         updateUser({ profileImageUrl: data.profileImageUrl });
@@ -235,6 +244,25 @@ export default function Settings() {
 
   return (
     <div className="space-y-10">
+      {/* Welcome Banner for new users */}
+      {!user?.profileComplete && user?.role !== 'ADMIN' && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-6 rounded-3xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-2xl shadow-primary-600/30"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+              <User className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black tracking-tight mb-1">Welcome! Let's complete your profile 👋</h2>
+              <p className="text-white/80 font-medium text-sm">Please fill in your details below and click <strong>Save Profile</strong> to access the full platform. This only takes a minute!</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">

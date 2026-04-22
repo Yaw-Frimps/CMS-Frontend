@@ -3,13 +3,15 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Loader2, ArrowRight, UserPlus } from 'lucide-react';
+import { User, Mail, Lock, Phone, Loader2, ArrowRight, UserPlus } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Register() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: ''
   });
@@ -35,11 +37,19 @@ export default function Register() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
+        phone: formData.phone.trim(),
         password: formData.password,
         admin: false
       });
       login(response.data);
-      navigate('/dashboard');
+
+      if (response.data.profileLinked) {
+        toast.success('Welcome back! Your existing member record has been linked. Please complete your profile.');
+      } else {
+        toast.success('Account created! Please complete your profile.');
+      }
+      // Always redirect to settings on first signup for profile completion
+      navigate('/settings');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to register. Please try again.');
     } finally {
@@ -131,6 +141,23 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-zinc-700 dark:text-zinc-300 ml-1">Phone Number</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-primary-500 transition-colors">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <input 
+                  type="tel" 
+                  name="phone"
+                  className="w-full pl-10 pr-4 py-3 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-100 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                  placeholder="e.g. 0241234567"
+                  value={formData.phone}
+                  onChange={handleChange}
                 />
               </div>
             </div>
