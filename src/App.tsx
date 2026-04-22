@@ -7,6 +7,8 @@ import MainLayout from './components/layout/MainLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import DashboardRouter from './pages/dashboard/DashboardRouter';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 
 import MembersList from './pages/members/MembersList';
 import DonationsList from './pages/donations/DonationsList';
@@ -31,6 +33,8 @@ function App() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Protected Routes Wrapper */}
             <Route element={<ProtectedRoute />}>

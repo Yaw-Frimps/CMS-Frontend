@@ -158,7 +158,7 @@ export default function UserDashboard() {
           <h3 className="text-sm font-black text-zinc-400 uppercase tracking-widest mb-1">Monthly Giving</h3>
           <div className="flex-1 mt-2">
             {loading ? <Loader2 className="w-6 h-6 animate-spin text-zinc-300" /> : (
-              <p className="text-4xl font-black text-zinc-900 dark:text-zinc-100">${monthlyGiving.toLocaleString()}</p>
+              <p className="text-4xl font-black text-zinc-900 dark:text-zinc-100">GH₵{monthlyGiving.toLocaleString()}</p>
             )}
           </div>
           <button onClick={() => navigate('/donations')} className="mt-8 text-emerald-600 font-black text-xs uppercase tracking-tighter flex items-center group">

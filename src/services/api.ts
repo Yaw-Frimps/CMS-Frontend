@@ -25,7 +25,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      const publicPaths = ['/login', '/register', '/', '/gallery'];
+      const publicPaths = ['/login', '/register', '/', '/gallery', '/forgot-password', '/reset-password'];
       if (!publicPaths.includes(window.location.pathname)) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

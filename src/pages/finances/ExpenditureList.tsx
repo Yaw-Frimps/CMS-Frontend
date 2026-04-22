@@ -130,7 +130,7 @@ export default function ExpenditureList() {
             <DollarSign className="w-8 h-8" />
           </div>
           <p className="text-sm font-black text-zinc-400 uppercase tracking-widest mb-1">Total Spending</p>
-          <h3 className="text-4xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter">GHS{totalExpenditure.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3>
+          <h3 className="text-4xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter">GH₵{totalExpenditure.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3>
         </motion.div>
       </motion.div>
 
@@ -181,7 +181,7 @@ export default function ExpenditureList() {
                     </span>
                   </td>
                   <td className="px-8 py-5 text-right font-black text-rose-600 tracking-tight text-lg">
-                    GHS{Number(e.amount).toFixed(2)}
+                    GH₵{Number(e.amount).toFixed(2)}
                   </td>
                   <td className="px-8 py-5 text-right">
                     <button 
@@ -231,7 +231,7 @@ export default function ExpenditureList() {
 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Amount (GHS)</label>
+                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Amount (GH₵)</label>
                     <input required type="number" step="0.01" min="0" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})}
                       className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-black"
                     />

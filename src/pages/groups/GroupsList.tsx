@@ -214,7 +214,7 @@ export default function GroupsList() {
 
               <div className="p-8 flex-1 flex flex-col">
               {isAdmin && (
-                <div className="absolute top-0 right-0 p-6 flex gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-500">
+                <div className="absolute top-0 right-0 p-6 flex gap-2 transition-transform duration-500">
                   <button 
                     onClick={() => handleOpenEdit(group)}
                     className="p-3 bg-white dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-primary-600 hover:text-white transition-all shadow-sm"

@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                 type: 'donation',
                 date: new Date(d.donationDate),
                 title: 'Donation Received',
-                desc: `$${d.amount} to ${d.fund}`
+                desc: `GH₵ ${d.amount} to ${d.fund}`
             });
         });
         eventsRes.data.forEach((e: any) => {
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: 'Total Members', value: loading ? '...' : totalMembers.toLocaleString(), icon: Users, change: '+12.5%', trend: 'up', color: 'primary' },
-    { label: 'Monthly Giving', value: loading ? '...' : `$${monthlyGiving.toLocaleString()}`, icon: DollarSign, change: '+8.2%', trend: 'up', color: 'secondary' },
+    { label: 'Monthly Giving', value: loading ? '...' : `GH₵ ${monthlyGiving.toLocaleString()}`, icon: DollarSign, change: '+8.2%', trend: 'up', color: 'secondary' },
     { label: 'Upcoming Events', value: loading ? '...' : totalEvents.toString(), icon: Calendar, change: '+3', trend: 'up', color: 'accent' },
     { label: 'Active Groups', value: loading ? '...' : activeGroups.toString(), icon: Activity, change: '0', trend: 'neutral', color: 'zinc' },
   ];
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
               <div key={idx} className="flex-1 flex flex-col items-center group h-full justify-end">
                 <div className="relative w-full flex flex-col items-center group-hover:z-10">
                   <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-bold px-2 py-1 rounded-md pointer-events-none whitespace-nowrap">
-                    ${data.amount.toLocaleString()}
+                    GHS {data.amount.toLocaleString()}
                   </div>
                   <motion.div 
                     initial={{ height: 0 }}

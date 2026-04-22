@@ -160,7 +160,7 @@ export default function Analytics() {
                 <TrendingUp className="w-24 h-24 text-emerald-500" />
               </div>
               <p className="text-sm font-black text-zinc-400 uppercase tracking-widest mb-2">Total Income</p>
-              <h3 className="text-4xl font-black text-emerald-600 tracking-tighter">${financialSummary.totalDonations.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3>
+              <h3 className="text-4xl font-black text-emerald-600 tracking-tighter">GH₵{financialSummary.totalDonations.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3>
               <div className="mt-4 flex items-center gap-2 text-xs font-bold text-zinc-400">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
                 Tithes, Offertory & Seeds
@@ -176,7 +176,7 @@ export default function Analytics() {
                 <ArrowDownRight className="w-24 h-24 text-rose-500" />
               </div>
               <p className="text-sm font-black text-zinc-400 uppercase tracking-widest mb-2">Total Expenditures</p>
-              <h3 className="text-4xl font-black text-rose-600 tracking-tighter">${financialSummary.totalExpenditures.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3>
+              <h3 className="text-4xl font-black text-rose-600 tracking-tighter">GH₵{financialSummary.totalExpenditures.toLocaleString(undefined, {minimumFractionDigits: 2})}</h3>
               <div className="mt-4 flex items-center gap-2 text-xs font-bold text-zinc-400">
                 <div className="w-2 h-2 rounded-full bg-rose-500" />
                 Church Expenses & Maintenance
@@ -193,7 +193,7 @@ export default function Analytics() {
               </div>
               <p className="text-sm font-black text-primary-500 uppercase tracking-widest mb-2">Net Revenue</p>
               <h3 className={`text-4xl font-black tracking-tighter ${financialSummary.netRevenue >= 0 ? 'text-primary-600' : 'text-rose-600'}`}>
-                ${financialSummary.netRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                GH₵{financialSummary.netRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}
               </h3>
               <div className="mt-4 flex items-center gap-2 text-xs font-bold text-zinc-400">
                 <div className={`w-2 h-2 rounded-full ${financialSummary.netRevenue >= 0 ? 'bg-primary-500' : 'bg-rose-500'}`} />
@@ -361,17 +361,17 @@ export default function Analytics() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between gap-8">
                               <span className="text-xs font-bold text-zinc-400">Total Income:</span>
-                              <span className="text-sm font-black text-emerald-600">${payload[0].value.toLocaleString()}</span>
+                              <span className="text-sm font-black text-emerald-600">GH₵{payload[0].value.toLocaleString()}</span>
                             </div>
                             <div className="flex items-center justify-between gap-8">
                               <span className="text-xs font-bold text-zinc-400">Total Expense:</span>
-                              <span className="text-sm font-black text-rose-600">${payload[1].value.toLocaleString()}</span>
+                              <span className="text-sm font-black text-rose-600">GH₵{payload[1].value.toLocaleString()}</span>
                             </div>
                             <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
                             <div className="flex items-center justify-between gap-8">
                               <span className="text-xs font-bold text-zinc-400">Net Revenue:</span>
                               <span className={`text-sm font-black ${payload[2].value >= 0 ? 'text-primary-600' : 'text-rose-600'}`}>
-                                ${payload[2].value.toLocaleString()}
+                                GH₵{payload[2].value.toLocaleString()}
                               </span>
                             </div>
                           </div>
