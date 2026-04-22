@@ -4,6 +4,8 @@ import { Search, Plus, Edit2, Trash2, Users, X, Loader2, Layers, Clock, LogIn, L
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import ImageUpload from '../../components/common/ImageUpload';
+import ConfirmModal from '../../components/common/ConfirmModal';
+import toast from 'react-hot-toast';
 
 export default function GroupsList() {
   const { isAdmin, user } = useAuth();
@@ -21,6 +23,11 @@ export default function GroupsList() {
   });
   const [selectedGroupImage, setSelectedGroupImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null
+  });
 
   const fetchGroups = async () => {
     try {
@@ -63,13 +70,18 @@ export default function GroupsList() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this group?')) {
-      try {
-        await api.delete(`/groups/${id}`);
-        fetchGroups();
-      } catch (error) {
-        console.error('Failed to delete group', error);
-      }
+    setConfirmDelete({ isOpen: true, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return;
+    try {
+      await api.delete(`/groups/${confirmDelete.id}`);
+      toast.success('Group deleted successfully');
+      fetchGroups();
+    } catch (error) {
+      console.error('Failed to delete group', error);
+      toast.error('Failed to delete group');
     }
   };
 
@@ -83,7 +95,7 @@ export default function GroupsList() {
       }
       fetchGroups();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Action failed');
+      toast.error(error.response?.data?.message || 'Action failed');
     }
   };
 
@@ -369,6 +381,15 @@ export default function GroupsList() {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        title="Delete Group"
+        message="Are you sure you want to delete this group? This will remove all group settings and historical data."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+        confirmText="Delete Group"
+      />
     </div>
   );
 }

@@ -1,0 +1,79 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\components\layout\MainLayout.tsx
+  44:12  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\components\layout\MainLayout.tsx:44:12
+  42 |     if (!user?.profileImageUrl) {
+  43 |       // Data fetching in effect - React pattern for loading async data
+> 44 |       void fetchProfileImage();
+     |            ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |     }
+  46 |   }, [fetchProfileImage, user?.profileImageUrl]);
+  47 |  react-hooks/set-state-in-effect
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\context\AuthContext.tsx
+  56:6   warning  React Hook useEffect has missing dependencies: 'token' and 'user'. Either include them or remove the dependency array           react-hooks/exhaustive-deps
+  97:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\context\ThemeContext.tsx
+  40:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\admin\GalleryManager.tsx
+  97:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\auth\Register.tsx
+  43:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\dashboard\AdminDashboard.tsx
+  16:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  17:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  37:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  74:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  75:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  84:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\donations\DonationsList.tsx
+  7:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  8:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\events\EventsList.tsx
+  10:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\groups\GroupsList.tsx
+  10:40  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  14:52  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  29:48  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  43:6   warning  React Hook useEffect has a missing dependency: 'fetchGroups'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  52:34  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  85:21  error    Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+
+c:\Users\User\Desktop\myprojects\real projects\church-management\frontend\src\pages\members\MembersList.tsx
+    8:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   16:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   61:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  458:42  error  'e' is defined but never used             @typescript-eslint/no-unused-vars
+  466:79  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  472:40  error  'e' is defined but never used             @typescript-eslint/no-unused-vars
+
+✖ 37 problems (35 errors, 2 warnings)
+

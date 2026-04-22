@@ -12,6 +12,8 @@ import {
   Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmModal from '../../components/common/ConfirmModal';
+import toast from 'react-hot-toast';
 
 interface GalleryImage {
   id: number;
@@ -42,6 +44,11 @@ export default function GalleryManager() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null
+  });
+
   const fetchImages = async () => {
     try {
       setLoading(true);
@@ -62,7 +69,7 @@ export default function GalleryManager() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        alert('File size exceeds 10MB limit.');
+        toast.error('File size exceeds 10MB limit.');
         return;
       }
       setSelectedFile(file);
@@ -97,19 +104,25 @@ export default function GalleryManager() {
     } catch (err: any) {
       console.error('Upload failed', err);
       const msg = err.response?.data?.message || err.message || 'Unknown error';
-      alert(`Failed to upload image: ${msg}`);
+      toast.error(`Failed to upload image: ${msg}`);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) return;
+    setConfirmDelete({ isOpen: true, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return;
     try {
-      await api.delete(`/gallery/${id}`);
+      await api.delete(`/gallery/${confirmDelete.id}`);
+      toast.success('Image deleted successfully');
       fetchImages();
     } catch (err) {
       console.error('Delete failed', err);
+      toast.error('Failed to delete image');
     }
   };
 
@@ -354,6 +367,15 @@ export default function GalleryManager() {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        title="Delete Image"
+        message="Are you sure you want to delete this gallery image? This will permanently remove it from the gallery."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+        confirmText="Delete Image"
+      />
     </div>
   );
 }

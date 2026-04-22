@@ -3,6 +3,8 @@ import { api } from '../../services/api';
 import { Search, Plus, Edit2, Trash2, Phone, X, Loader2, User as UserIcon, MapPin, Calendar, Mail, Layers, ChevronRight, ArrowUpDown, Heart, Briefcase, ShieldAlert, BadgeCheck } from 'lucide-react';
 import { getImageUrl } from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmModal from '../../components/common/ConfirmModal';
+import toast from 'react-hot-toast';
 
 export default function MembersList() {
   const [members, setMembers] = useState<any[]>([]);
@@ -22,6 +24,11 @@ export default function MembersList() {
     address: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null
+  });
 
   const fetchMembers = async () => {
     try {
@@ -65,13 +72,18 @@ export default function MembersList() {
 
   const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this member?')) {
-      try {
-        await api.delete(`/members/${id}`);
-        fetchMembers();
-      } catch (error) {
-        console.error('Failed to delete member', error);
-      }
+    setConfirmDelete({ isOpen: true, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return;
+    try {
+      await api.delete(`/members/${confirmDelete.id}`);
+      toast.success('Member deleted successfully');
+      fetchMembers();
+    } catch (error) {
+      console.error('Failed to delete member', error);
+      toast.error('Failed to delete member');
     }
   };
 
@@ -348,6 +360,13 @@ export default function MembersList() {
                           </div>
                         </div>
                         <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center shrink-0"><Calendar className="w-4 h-4" /></div>
+                          <div>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Birthday</p>
+                            <p className="font-bold text-zinc-900 dark:text-zinc-100 text-[10px]">{selectedMember.dateOfBirth ? new Date(selectedMember.dateOfBirth).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not Set'}</p>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
                           <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0"><ArrowUpDown className="w-4 h-4" /></div>
                           <div>
                             <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Gender</p>
@@ -566,6 +585,15 @@ export default function MembersList() {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        title="Delete Member"
+        message="Are you sure you want to delete this member? All associated profile data will be permanently removed."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+        confirmText="Delete Member"
+      />
     </div>
   );
 }

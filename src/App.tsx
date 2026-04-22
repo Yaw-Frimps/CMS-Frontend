@@ -1,3 +1,4 @@
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -15,12 +16,16 @@ import Settings from './pages/settings/Settings';
 import Landing from './pages/public/Landing';
 import Gallery from './pages/public/Gallery';
 import GalleryManager from './pages/admin/GalleryManager';
+import AttendanceManager from './pages/admin/AttendanceManager';
+import Analytics from './pages/admin/Analytics';
+import ExpenditureList from './pages/finances/ExpenditureList';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <Toaster position="top-right" toastOptions={{ duration: 4000, style: { borderRadius: '1rem', background: '#333', color: '#fff' } }} />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/gallery" element={<Gallery />} />
@@ -40,6 +45,9 @@ function App() {
                   <Route path="/members" element={<MembersList />} />
                   <Route path="/donations" element={<DonationsList />} />
                   <Route path="/gallery-manager" element={<GalleryManager />} />
+                  <Route path="/attendance" element={<AttendanceManager />} />
+                  <Route path="/expenditures" element={<ExpenditureList />} />
+                  <Route path="/analytics" element={<Analytics />} />
                 </Route>
               </Route>
             </Route>

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, DollarSign, Calendar, Settings, LogOut, Image as ImageIcon, ChevronRight, Layers } from 'lucide-react';
+import { Home, Users, DollarSign, Calendar, Settings, LogOut, Image as ImageIcon, ChevronRight, Layers, ClipboardCheck, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 
@@ -11,9 +11,12 @@ export default function Sidebar() {
     { name: 'Dashboard', path: '/dashboard', icon: Home, adminOnly: false },
     { name: 'Directory', path: '/members', icon: Users, adminOnly: true },
     { name: 'Financials', path: '/donations', icon: DollarSign, adminOnly: true },
+    { name: 'Expenditures', path: '/expenditures', icon: ClipboardCheck, adminOnly: true },
     { name: 'Events', path: '/events', icon: Calendar, adminOnly: false },
     { name: 'Groups', path: '/groups', icon: Layers, adminOnly: false },
     { name: 'Gallery Manager', path: '/gallery-manager', icon: ImageIcon, adminOnly: true },
+    { name: 'Attendance', path: '/attendance', icon: ClipboardCheck, adminOnly: true },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3, adminOnly: true },
     { name: 'Settings', path: '/settings', icon: Settings, adminOnly: false },
   ];
 

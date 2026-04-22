@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth } from '../../context/AuthContext';
@@ -11,9 +11,9 @@ export default function MainLayout() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
-  const [profileImage, setProfileImage] = useState<string | null>(user?.profileImageUrl || null);
+  const [profileImage, setProfileImage] = useState<string | null>(() => user?.profileImageUrl || null);
 
-  const fetchProfileImage = async () => {
+  const fetchProfileImage = useCallback(async () => {
     if (user?.memberId) {
       try {
         const res = await api.get(`/members/${user.memberId}`);
@@ -23,26 +23,27 @@ export default function MainLayout() {
         console.error("Failed to fetch profile image", error);
       }
     }
-  };
+  }, [user]);
 
-  const handleProfileUpdate = (event: CustomEvent) => {
+  const handleProfileUpdate = useCallback((event: CustomEvent) => {
     if (event.detail?.profileImageUrl) {
       setProfileImage(event.detail.profileImageUrl);
     } else {
       fetchProfileImage();
     }
-  };
+  }, [fetchProfileImage]);
 
   useEffect(() => {
-    if (user?.profileImageUrl) {
-      setProfileImage(user.profileImageUrl);
-    } else {
-      fetchProfileImage();
-    }
-    
     window.addEventListener('profileUpdated', handleProfileUpdate as EventListener);
     return () => window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
-  }, [user?.memberId, user?.profileImageUrl]);
+  }, [handleProfileUpdate]);
+
+  useEffect(() => {
+    if (!user?.profileImageUrl) {
+      // Data fetching in effect - React pattern for loading async data
+      void fetchProfileImage();
+    }
+  }, [fetchProfileImage, user?.profileImageUrl]);
 
   return (
     <div className="flex h-screen bg-neutral-100 dark:bg-zinc-950 overflow-hidden font-sans transition-colors duration-500">
@@ -61,7 +62,7 @@ export default function MainLayout() {
           </div>
           
           <div className="flex items-center space-x-6">
-            <button className="p-2 text-zinc-500 hover:text-primary-600 dark:text-zinc-400 dark:hover:text-primary-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all relative">
+            <button title="Notifications" aria-label="Notifications" className="p-2 text-zinc-500 hover:text-primary-600 dark:text-zinc-400 dark:hover:text-primary-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900"></span>
             </button>

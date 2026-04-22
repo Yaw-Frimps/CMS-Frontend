@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api, getImageUrl } from '../../services/api';
 import { User, Lock, Shield, Mail, Loader2, Eye, EyeOff, Camera, Calendar, CheckCircle2, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 // ── Settings Page ──────────────────────────────────────────────────────────────
 export default function Settings() {
@@ -86,7 +87,7 @@ export default function Settings() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { alert('Select an image.'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('Select an image.'); return; }
     setSelectedFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
@@ -172,8 +173,11 @@ export default function Settings() {
         updateUser({ profileImageUrl: data.profileImageUrl });
         window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profileImageUrl: data.profileImageUrl } }));
       }
-    } catch (error: any) {
-      setErrorMsg(error.response?.data?.message || error.message || 'Failed to update profile.');
+    } catch (error: unknown) {
+      type ApiError = { response?: { data?: { message?: string } }; message?: string };
+      const apiError = error as ApiError;
+      const message = apiError.response?.data?.message || apiError.message || 'Failed to update profile.';
+      setErrorMsg(message);
       setTimeout(() => setErrorMsg(''), 5000);
     } finally {
       setSaving(false);
@@ -196,8 +200,11 @@ export default function Settings() {
       setSuccessMsg('Password updated successfully!');
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
       setTimeout(() => setSuccessMsg(''), 3000);
-    } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || 'Update failed. Check current password.');
+    } catch (err: unknown) {
+      type ApiError = { response?: { data?: { message?: string } }; message?: string };
+      const apiError = err as ApiError;
+      const message = apiError.response?.data?.message || apiError.message || 'Update failed. Check current password.';
+      setErrorMsg(message);
       setTimeout(() => setErrorMsg(''), 5000);
     } finally {
       setPassSaving(false);
@@ -214,7 +221,7 @@ export default function Settings() {
     show: { opacity: 1, y: 0 }
   };
 
-  const formatDateForInput = (dateObj: any) => {
+  const formatDateForInput = (dateObj: string | number[] | null | undefined) => {
     if (!dateObj) return '';
     if (Array.isArray(dateObj)) {
       const [y, m, d] = dateObj;
@@ -303,10 +310,10 @@ export default function Settings() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Email Address</label>
+                      <label htmlFor="email" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Email Address</label>
                       <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                        <input type="email" value={user?.email || ''} disabled
+                        <input id="email" type="email" value={user?.email || ''} disabled title="Email Address" placeholder="Email Address"
                           className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-400 cursor-not-allowed font-medium"
                         />
                       </div>
@@ -321,20 +328,20 @@ export default function Settings() {
                         {/* Basic Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                            <div className="space-y-2">
-                            <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">First Name</label>
-                            <input type="text" value={profileData.firstName} onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                            <label htmlFor="firstName" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">First Name</label>
+                            <input id="firstName" type="text" value={profileData.firstName} onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })} title="First Name" placeholder="First Name"
                               className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Last Name</label>
-                            <input type="text" value={profileData.lastName} onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                            <label htmlFor="lastName" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Last Name</label>
+                            <input id="lastName" type="text" value={profileData.lastName} onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })} title="Last Name" placeholder="Last Name"
                               className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Phone Number</label>
-                            <input type="text" value={profileData.phone} onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                            <label htmlFor="phone" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Phone Number</label>
+                            <input id="phone" type="text" value={profileData.phone} onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })} title="Phone Number" placeholder="Phone Number"
                               className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                             />
                           </div>
@@ -343,7 +350,7 @@ export default function Settings() {
                               <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Date of Birth</label>
                               <div className="relative">
                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
-                                <input type="date" value={formatDateForInput(profileData.dateOfBirth)} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })}
+                                <input type="date" value={formatDateForInput(profileData.dateOfBirth)} onChange={(e) => setProfileData({ ...profileData, dateOfBirth: e.target.value })} title="Date of Birth" placeholder="Date of Birth"
                                   className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold cursor-pointer"
                                 />
                               </div>
@@ -355,14 +362,14 @@ export default function Settings() {
                                 <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Joined Date</label>
                                 <div className="relative">
                                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
-                                  <input type="date" value={formatDateForInput(profileData.joinedDate)} onChange={(e) => setProfileData({ ...profileData, joinedDate: e.target.value })}
+                                  <input type="date" value={formatDateForInput(profileData.joinedDate)} onChange={(e) => setProfileData({ ...profileData, joinedDate: e.target.value })} title="Joined Date" placeholder="Joined Date"
                                     className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold cursor-pointer"
                                   />
                                 </div>
                               </div>
                               <div className="space-y-2">
                                 <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Home Address</label>
-                                <textarea rows={2} value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
+                                <textarea id="address" rows={2} value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })} title="Home Address" placeholder="Home Address"
                                   className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none"
                                 />
                               </div>
@@ -376,7 +383,7 @@ export default function Settings() {
                             <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-2 gap-8">
                               <div className="space-y-2">
                                 <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Gender</label>
-                                <select value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}
+                                <select aria-label="Gender" value={profileData.gender} onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })} title="Gender"
                                   className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold appearance-none cursor-pointer"
                                 >
                                   <option value="Male">Male</option>
@@ -386,7 +393,7 @@ export default function Settings() {
                               </div>
                               <div className="space-y-2">
                                 <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">System Rank (Status)</label>
-                                <select value={profileData.membershipStatus} onChange={(e) => setProfileData({ ...profileData, membershipStatus: e.target.value })}
+                                <select aria-label="System Rank (Status)" value={profileData.membershipStatus} onChange={(e) => setProfileData({ ...profileData, membershipStatus: e.target.value })} title="System Rank (Status)"
                                   className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold appearance-none cursor-pointer"
                                 >
                                   <option value="Member">Member</option>
@@ -396,7 +403,7 @@ export default function Settings() {
                               </div>
                               <div className="space-y-2">
                                 <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Marital Status</label>
-                                <select value={profileData.maritalStatus} onChange={(e) => setProfileData({ ...profileData, maritalStatus: e.target.value })}
+                                <select aria-label="Marital Status" value={profileData.maritalStatus} onChange={(e) => setProfileData({ ...profileData, maritalStatus: e.target.value })} title="Marital Status"
                                   className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold appearance-none cursor-pointer"
                                 >
                                   <option value="Single">Single</option>
@@ -424,8 +431,8 @@ export default function Settings() {
 
                               {profileData.maritalStatus === 'Married' && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2">
-                                  <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Spouse's Name</label>
-                                  <input type="text" value={profileData.spouseName} onChange={(e) => setProfileData({ ...profileData, spouseName: e.target.value })}
+                                  <label htmlFor="spouseName" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Spouse's Name</label>
+                                  <input id="spouseName" type="text" value={profileData.spouseName} onChange={(e) => setProfileData({ ...profileData, spouseName: e.target.value })} title="Spouse's Name" placeholder="Spouse's Name"
                                     className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                                   />
                                 </motion.div>
@@ -452,7 +459,7 @@ export default function Settings() {
                                         onChange={(e) => updateChild(idx, 'age', e.target.value)}
                                         className="w-20 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-xl border border-zinc-100 dark:border-zinc-800 font-bold text-sm text-center"
                                       />
-                                      <button type="button" onClick={() => removeChild(idx)} className="p-2 text-zinc-400 hover:text-red-500 transition-colors">
+                                      <button type="button" onClick={() => removeChild(idx)} aria-label="Remove child" className="p-2 text-zinc-400 hover:text-red-500 transition-colors">
                                         <Trash2 className="w-4 h-4" />
                                       </button>
                                     </motion.div>
@@ -477,9 +484,9 @@ export default function Settings() {
                                   <div className="w-full h-full flex items-center justify-center text-zinc-300"><User className="w-10 h-10" /></div>
                                 )}
                               </div>
-                              <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary-600 text-white rounded-2xl flex items-center justify-center cursor-pointer shadow-lg hover:bg-primary-500 transition-colors">
+                                <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary-600 text-white rounded-2xl flex items-center justify-center cursor-pointer shadow-lg hover:bg-primary-500 transition-colors" aria-label="Upload profile image">
                                 <Camera className="w-5 h-5" />
-                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" title="Upload profile image" />
                               </label>
                             </div>
                             <div className="flex-1">
@@ -522,9 +529,9 @@ export default function Settings() {
                   )}
 
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Current Password</label>
+                    <label htmlFor="currentPassword" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Current Password</label>
                     <div className="relative">
-                      <input type={showOld ? 'text' : 'password'} required value={passwordData.oldPassword} onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                      <input id="currentPassword" type={showOld ? 'text' : 'password'} required value={passwordData.oldPassword} onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })} title="Current Password" placeholder="Current Password"
                         className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                       />
                       <button type="button" onClick={() => setShowOld(!showOld)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
@@ -535,9 +542,9 @@ export default function Settings() {
 
                   <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                     <div className="space-y-2">
-                      <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">New Password</label>
+                      <label htmlFor="newPassword" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">New Password</label>
                       <div className="relative">
-                        <input type={showNew ? 'text' : 'password'} required minLength={6} value={passwordData.newPassword} onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        <input id="newPassword" type={showNew ? 'text' : 'password'} required minLength={6} value={passwordData.newPassword} onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })} title="New Password" placeholder="New Password"
                           className="w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
                         />
                         <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
@@ -547,9 +554,9 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Confirm New Password</label>
+                      <label htmlFor="confirmNewPassword" className="text-sm font-black text-zinc-500 uppercase tracking-widest ml-1">Confirm New Password</label>
                       <div className="relative">
-                        <input type={showConfirm ? 'text' : 'password'} required minLength={6} value={passwordData.confirmPassword} onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        <input id="confirmNewPassword" type={showConfirm ? 'text' : 'password'} required minLength={6} value={passwordData.confirmPassword} onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })} title="Confirm New Password" placeholder="Confirm New Password"
                           className={`w-full px-5 py-3.5 bg-white/50 dark:bg-zinc-900/50 text-zinc-900 dark:text-zinc-50 rounded-2xl border ${
                             passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword
                               ? 'border-red-400 focus:ring-red-500/20'

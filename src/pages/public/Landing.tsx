@@ -15,12 +15,22 @@ interface GalleryImage {
   imageUrl: string;
 }
 
+interface EventInfo {
+  id: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+  description?: string;
+  location?: string;
+  imageUrl?: string;
+}
+
 export default function Landing() {
   const { isAuthenticated } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroImages, setHeroImages] = useState<GalleryImage[]>([]);
   const [landingGallery, setLandingGallery] = useState<GalleryImage[]>([]);
-  const [publicEvents, setPublicEvents] = useState<any[]>([]);
+  const [publicEvents, setPublicEvents] = useState<EventInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,8 +45,8 @@ export default function Landing() {
         setLandingGallery(galleryRes.data);
         
         const upcoming = eventsRes.data
-            .filter((e: any) => new Date(e.startTime) >= new Date())
-            .sort((a: any, b: any) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+            .filter((e: EventInfo) => new Date(e.startTime) >= new Date())
+            .sort((a: EventInfo, b: EventInfo) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
             .slice(0, 3);
         setPublicEvents(upcoming);
       } catch (err) {

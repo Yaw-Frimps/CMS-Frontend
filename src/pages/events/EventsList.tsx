@@ -4,6 +4,8 @@ import { Calendar as CalendarIcon, MapPin, Clock, Users, Plus, X, Loader2, Trash
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ImageUpload from '../../components/common/ImageUpload';
+import ConfirmModal from '../../components/common/ConfirmModal';
+import toast from 'react-hot-toast';
 
 export default function EventsList() {
   const { isAdmin, user } = useAuth();
@@ -27,9 +29,13 @@ export default function EventsList() {
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [members, setMembers] = useState<any[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<number | ''>('');
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceSuccess, setAttendanceSuccess] = useState('');
+
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null
+  });
 
   const fetchEvents = async () => {
     try {
@@ -82,13 +88,18 @@ export default function EventsList() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      try {
-        await api.delete(`/events/${id}`);
-        fetchEvents();
-      } catch (error) {
-        console.error('Failed to delete event', error);
-      }
+    setConfirmDelete({ isOpen: true, id });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return;
+    try {
+      await api.delete(`/events/${confirmDelete.id}`);
+      toast.success('Event deleted successfully');
+      fetchEvents();
+    } catch (error) {
+      console.error('Failed to delete event', error);
+      toast.error('Failed to delete event');
     }
   };
 
@@ -123,7 +134,7 @@ export default function EventsList() {
       setSelectedMemberId('');
     } catch (error) {
       console.error('Failed to mark attendance', error);
-      alert('Failed to record attendance.');
+      toast.error('Failed to record attendance.');
     } finally {
       setAttendanceLoading(false);
     }
@@ -565,6 +576,15 @@ export default function EventsList() {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        title="Delete Event"
+        message="Are you sure you want to delete this event? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+        confirmText="Delete Event"
+      />
     </div>
   );
 }

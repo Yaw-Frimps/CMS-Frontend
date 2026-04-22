@@ -1,5 +1,14 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
+interface LoginData {
+  token: string;
+  id: number;
+  email: string;
+  role: string;
+  memberId: number;
+  profileImageUrl?: string;
+}
+
 interface User {
   id: number;
   email: string;
@@ -11,7 +20,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (data: any) => void;
+  login: (data: LoginData) => void;
   logout: () => void;
   updateUser: (updatedData: Partial<User>) => void;
   isAuthenticated: boolean;
@@ -29,18 +38,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem('token');
   });
 
-  // useEffect is still nice to have if external things change localStorage,
-  // but initial state is now synchronous.
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const hydrateFromStorage = () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    } else {
-      setToken(null);
-      setUser(null);
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      }
+    };
+    
+    // Only hydrate if we don't already have user data from initial state
+    if (!user && !token) {
+      hydrateFromStorage();
     }
   }, []);
 
@@ -90,3 +101,6 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Separate file export to satisfy react-refresh/only-export-components
+// Keep hooks separate from provider exports
