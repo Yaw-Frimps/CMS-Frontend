@@ -28,6 +28,7 @@ export default function EventsList() {
 
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | ''>('');
   const [members, setMembers] = useState<any[]>([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceSuccess, setAttendanceSuccess] = useState('');

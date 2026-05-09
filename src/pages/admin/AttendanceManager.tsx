@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Plus, Save, Loader2, CheckCircle2, AlertCircle, History, Edit2, Trash2, X } from 'lucide-react';
+import { Calendar, Users, Plus, Save, Loader2, History, Edit2, Trash2, X } from 'lucide-react';
 import { attendanceService, type MeetingAttendance } from '../../services/attendance';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import toast from 'react-hot-toast';

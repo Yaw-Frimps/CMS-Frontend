@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell 
 } from 'recharts';
 import { TrendingUp, Users, Calendar, ArrowUpRight, ArrowDownRight, Loader2, PieChart, DollarSign, BarChart3 } from 'lucide-react';
 import { attendanceService, type MeetingAttendance } from '../../services/attendance';
@@ -303,7 +303,7 @@ export default function Analytics() {
                   barSize={40}
                   animationDuration={1500}
                 >
-                  {data.slice(-5).map((entry, index) => (
+                  {data.slice(-5).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#2563eb' : '#3b82f6'} />
                   ))}
                 </Bar>
@@ -361,17 +361,17 @@ export default function Analytics() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between gap-8">
                               <span className="text-xs font-bold text-zinc-400">Total Income:</span>
-                              <span className="text-sm font-black text-emerald-600">GH₵{payload[0].value.toLocaleString()}</span>
+                              <span className="text-sm font-black text-emerald-600">GH₵{payload[0]?.value?.toLocaleString()}</span>
                             </div>
                             <div className="flex items-center justify-between gap-8">
                               <span className="text-xs font-bold text-zinc-400">Total Expense:</span>
-                              <span className="text-sm font-black text-rose-600">GH₵{payload[1].value.toLocaleString()}</span>
+                              <span className="text-sm font-black text-rose-600">GH₵{payload[1]?.value?.toLocaleString()}</span>
                             </div>
                             <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
                             <div className="flex items-center justify-between gap-8">
                               <span className="text-xs font-bold text-zinc-400">Net Revenue:</span>
-                              <span className={`text-sm font-black ${payload[2].value >= 0 ? 'text-primary-600' : 'text-rose-600'}`}>
-                                GH₵{payload[2].value.toLocaleString()}
+                              <span className={`text-sm font-black ${Number(payload[2]?.value || 0) >= 0 ? 'text-primary-600' : 'text-rose-600'}`}>
+                                GH₵{payload[2]?.value?.toLocaleString()}
                               </span>
                             </div>
                           </div>

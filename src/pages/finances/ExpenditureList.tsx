@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
-import { Receipt, DollarSign, Plus, X, Loader2, Calendar, Tag, Trash2 } from 'lucide-react';
+import { Receipt, DollarSign, Plus, X, Loader2, Calendar, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/common/ConfirmModal';
