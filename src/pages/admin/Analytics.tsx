@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell 
+ AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell 
 } from 'recharts';
 import { TrendingUp, Users, Calendar, ArrowUpRight, ArrowDownRight, Loader2, PieChart, DollarSign, BarChart3 } from 'lucide-react';
 import { attendanceService, type MeetingAttendance } from '../../services/attendance';
